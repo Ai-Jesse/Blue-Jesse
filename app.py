@@ -18,11 +18,12 @@ def homepage(): # view function
     render_template(html, test=5) [#Jacky]
     '''
 
-@app.route("/login")
+@app.route("/login", method=["GET"]) # Only get method
 def loginPage():
     return render_template("login.html") # Files can be served easier with static files check flask documenation
 
 
+@app.route("/loginData", method=["POST"])
 
 
 
