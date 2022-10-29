@@ -1,8 +1,9 @@
+from urllib import request
 from API import MongoDB_wrapper
 from flask import Flask, render_template
-
-
 from pymongo import MongoClient
+
+import json
 
 
 # Setting up Database for the project
@@ -34,7 +35,8 @@ def loginPage():
 
 @app.route("/loginData", methods=["POST"]) # Only post method
 def logging_userData():
-    print(request) # User name should be max 12 characters
+    forumData = request.form
+    print(format) # User name should be max 12 characters
     # special characters that we don't want in username: &, ~, /, <, >, ;, [space]
     
 
