@@ -6,7 +6,7 @@ app = Flask("blue_Jesse")
 
 @app.route("/") # converts normal function to view function
 def homepage(): # view function
-    print("Someone is at the homepage")
+    print("Someone is at the homepage", flush=True)
     return render_template("index.html")
 
     '''
@@ -18,14 +18,14 @@ def homepage(): # view function
     render_template(html, test=5) [#Jacky]
     '''
 
-@app.route("/login", method=["GET"]) # Only get method
+@app.route("/login", methods=["GET"]) # Only get method
 def loginPage():
     return render_template("login.html") # Files can be served easier with static files check flask documenation
 
 
-@app.route("/loginData", method=["POST"])
-
-
+@app.route("/loginData", methods=["POST"]) # Only get method
+def logging_userData():
+    print(request)
 
 
 
