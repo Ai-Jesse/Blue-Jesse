@@ -1,8 +1,17 @@
+from API import MongoDB_wrapper
 from flask import Flask, render_template
 
+
+from pymongo import MongoClient
+
+
+# Setting up Database for the project
+client = MongoClient("mongo")
+mongo = MongoDB_wrapper(client)
+print("mongoDB is up I think")
+app = Flask("blue_Jesse")
 print("App running I think")
 
-app = Flask("blue_Jesse")
 
 @app.route("/") # converts normal function to view function
 def homepage(): # view function
@@ -23,9 +32,11 @@ def loginPage():
     return render_template("login.html") # Files can be served easier with static files check flask documenation
 
 
-@app.route("/loginData", methods=["POST"]) # Only get method
+@app.route("/loginData", methods=["POST"]) # Only post method
 def logging_userData():
-    print(request)
+    print(request) # User name should be max 12 characters
+    # special characters that we don't want in username: &, ~, /, <, >, ;, [space]
+    
 
 
 

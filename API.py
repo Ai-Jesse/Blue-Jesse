@@ -1,6 +1,7 @@
 # For now everyhting is in one file
 
 
+from asyncio import current_task
 import json # currently used by: Security class
 
 # This class will be used for api class that will be needed through out the project 
@@ -20,6 +21,10 @@ class MongoDB_wrapper:
         return
     def insert(self, InputData, TableName):
         return
+    def search(self, InputData, tableName):
+        currentTable = self.database[tableName]
+        search_result = currentTable.find_one(InputData)
+        return search_result
 
 
 
@@ -27,6 +32,6 @@ class MongoDB_wrapper:
 class Security:
     def __init__(self):
         return
-    def vaild_post_data(self,ExectedKeys:list, IcomingData:json):
+    def vaild_post_data(self,ExectedKeys:list, IncomingData:json):
         return
     
