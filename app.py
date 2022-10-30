@@ -64,5 +64,10 @@ def logging_userData():
         # direct the user to the user homepage [#Jacky]
 
 
+
+@app.route("/changelog")
+def display_changelog():
+    return
+
 # app.run() # Don't use this for final product [#Jacky]
 
