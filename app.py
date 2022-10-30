@@ -1,5 +1,5 @@
 from urllib import request
-from API import MongoDB_wrapper
+from API import MongoDB_wrapper, Security
 from flask import Flask, render_template
 from pymongo import MongoClient
 
@@ -10,6 +10,12 @@ import json
 client = MongoClient("mongo")
 mongo = MongoDB_wrapper(client)
 print("mongoDB is up I think")
+
+# Setting up the Security
+security = Security()
+print("Security is setup I think")
+
+# Setting up the App
 app = Flask("blue_Jesse")
 print("App running I think")
 
@@ -36,11 +42,26 @@ def loginPage():
 @app.route("/loginData", methods=["POST"]) # Only post method
 def logging_userData():
     forumData = request.form
-    print(format) # User name should be max 12 characters
-    # special characters that we don't want in username: &, ~, /, <, >, ;, [space]
-    
 
 
+    # Some how get data from the form 
+    # Waiting for frontend
+    username = ""
+    password = ""
+
+    if security.password_and_user_checker(username=username, password=password):
+        # if the input is bad we redirect it to the login page
+        return
+    else:    
+        # Let hash the password
+        hashed_password = security.hash_265(password)
+        # Structure the data input to database
+        user = {"username": username, "password": hashed_password}
+        # Insert the hash password
+        MongoDB_wrapper.insert(user)
+        # print(format) # User name should be max 12 characters
+        # special characters that we don't want in username: &, ~, /, <,   >, ;, [space]
+        # direct the user to the user homepage [#Jacky]
 
 
 # app.run() # Don't use this for final product [#Jacky]
