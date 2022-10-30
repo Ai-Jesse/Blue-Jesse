@@ -25,7 +25,7 @@ print("App running I think")
 @app.route("/") # converts normal function to view function
 def homepage(): # view function
     print("Someone is at the homepage", flush=True)
-    return render_template("index.html")
+    return render_template("index.html", input="/changelog")
 
     '''
     When calling render_templates it search for the html files in the template folder
@@ -43,7 +43,7 @@ def loginPage():
 # God I hate python
 
 
-@app.route("loginData", methods=["POST"])
+@app.route("/loginData", methods=["POST"])
 def user_login():
     forumData = request.form
 
@@ -52,13 +52,17 @@ def user_login():
 
     # 1. Search for the user
     # 2. Check if the user exist in database
-
     #   2a. If the user exist redirect to /userpage
     #   2b. If the user does not exist redirect back to /login
     # [Jacky]
 
+    searchable_able = {}
 
-i
+    # mongo.search()
+
+
+    return
+
 # This is signup data I mess up
 @app.route("/singupData", methods=["POST"]) # Only post method
 def logging_userData():
@@ -89,7 +93,7 @@ def logging_userData():
         # special characters that we don't want in username: &, ~, /, <,   >, ;, [space]
         # direct the user to the user homepage [#Jacky]
 
-@app.route("/changelog")
+@app.route("/changelog", methods=["POST", "GET"])
 def display_changelog():
     change_data = open("changelogs.txt", "r").readlines()
 
@@ -98,7 +102,6 @@ def display_changelog():
     
     # This will use the template feature of flask and use that to display a text file that I will write on the side for all the changes I made and the goals this can also be used to test
     return render_template("changelog.html", change=change_data)
-# app.run() # Don't use this for final product [#Jacky]
 
 @app.route("/userpage")
 def display_userhomepage():
@@ -107,6 +110,6 @@ def display_userhomepage():
     # Using render_template I can use the same html for all user to make them feel special
 
     # Grab username
-    
 
-
+    return
+# app.run() # Don't use this for final product [#Jacky]
