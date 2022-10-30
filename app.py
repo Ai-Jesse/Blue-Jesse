@@ -40,19 +40,44 @@ def homepage(): # view function
 def loginPage():
     return render_template("login.html") # Files can be served easier with static files check flask documenation
 
+# God I hate python
 
-@app.route("/loginData", methods=["POST"]) # Only post method
+
+@app.route("loginData", methods=["POST"])
+def user_login():
+    forumData = request.form
+
+    username = ""
+    password = ""
+
+    # 1. Search for the user
+    # 2. Check if the user exist in database
+
+    #   2a. If the user exist redirect to /userpage
+    #   2b. If the user does not exist redirect back to /login
+    # [Jacky]
+
+
+i
+# This is signup data I mess up
+@app.route("/singupData", methods=["POST"]) # Only post method
 def logging_userData():
     forumData = request.form
 
+
+    # Can we do a preload of html here or we need to do that in the frontend?
+    
     # Some how get data from the form 
     # Waiting for frontend
     username = ""
     password = ""
 
-    if security_password_and_user_checker(username=username, password=password):
+    # probnley should have a loading screen here maybe
+    
+    # this is suppose to clean/ check for bad account and password
+    if security.password_and_user_checker(username=username, password=password):
         # if the input is bad we redirect it to the login page
-        return
+        return redirect("/login", code=302) # redirect the user to login page after a bad username and password
     else:    
         # Let hash the password
         hashed_password = security.hash_265(password)
@@ -67,8 +92,21 @@ def logging_userData():
 @app.route("/changelog")
 def display_changelog():
     change_data = open("changelogs.txt", "r").readlines()
+
+
+    # Change the change log into three selection so I can display them better
+    
     # This will use the template feature of flask and use that to display a text file that I will write on the side for all the changes I made and the goals this can also be used to test
     return render_template("changelog.html", change=change_data)
-
 # app.run() # Don't use this for final product [#Jacky]
+
+@app.route("/userpage")
+def display_userhomepage():
+    # display the userhomepage
+
+    # Using render_template I can use the same html for all user to make them feel special
+
+    # Grab username
+    
+
 
