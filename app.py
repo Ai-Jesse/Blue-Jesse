@@ -6,6 +6,8 @@ from pymongo import MongoClient
 import json
 
 
+# Just added gpg to my second laptop let see if this works[#Jacky]
+
 # Setting up Database for the project
 client = MongoClient("mongo")
 mongo = MongoDB_wrapper(client)
@@ -43,7 +45,6 @@ def loginPage():
 def logging_userData():
     forumData = request.form
 
-
     # Some how get data from the form 
     # Waiting for frontend
     username = ""
@@ -63,10 +64,9 @@ def logging_userData():
         # special characters that we don't want in username: &, ~, /, <,   >, ;, [space]
         # direct the user to the user homepage [#Jacky]
 
-
-
 @app.route("/changelog")
 def display_changelog():
+    # This will use the template feature of flask and use that to display a text file that I will write on the side for all the changes I made and the goals this can also be used to test
     return
 
 # app.run() # Don't use this for final product [#Jacky]
