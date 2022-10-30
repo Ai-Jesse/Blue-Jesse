@@ -50,7 +50,7 @@ def logging_userData():
     username = ""
     password = ""
 
-    if security.password_and_user_checker(username=username, password=password):
+    if security_password_and_user_checker(username=username, password=password):
         # if the input is bad we redirect it to the login page
         return
     else:    
@@ -66,8 +66,9 @@ def logging_userData():
 
 @app.route("/changelog")
 def display_changelog():
+    change_data = open("changelogs.txt", "r").readlines()
     # This will use the template feature of flask and use that to display a text file that I will write on the side for all the changes I made and the goals this can also be used to test
-    return
+    return render_template("changelog.html", change=change_data)
 
 # app.run() # Don't use this for final product [#Jacky]
 
