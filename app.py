@@ -1,6 +1,6 @@
 from urllib import request
 from API import MongoDB_wrapper, Security
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect
 from pymongo import MongoClient
 
 import json
