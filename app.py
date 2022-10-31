@@ -25,8 +25,7 @@ print("App running I think")
 @app.route("/") # converts normal function to view function
 def homepage(): # view function
     print("Someone is at the homepage", flush=True)
-    return render_template("index.html", input="/changelog")
-
+    return render_template("index.html", input="/login")
     '''
     When calling render_templates it search for the html files in the template folder
     you can pass in a key value pair to override the value at the localtion of the html template example:
@@ -35,13 +34,11 @@ def homepage(): # view function
     ----html----
     render_template(html, test=5) [#Jacky]
     '''
-
 @app.route("/login", methods=["GET"]) # Only get method
 def loginPage():
     return render_template("login.html") # Files can be served easier with static files check flask documenation
 
 # God I hate python
-
 
 @app.route("/loginData", methods=["POST"])
 def user_login():
@@ -56,26 +53,31 @@ def user_login():
     #   2b. If the user does not exist redirect back to /login
     # [Jacky]
 
-    searchable_able = {}
+    searchable_able = {"username" : username, "password": password}
 
-    # mongo.search()
+    # Search in the user finish 
+    value = mongo.search(searchable_able, "user")
 
+    # Check if the user is in database
+    if value == None:
+        # If the user does not exist
+        # Let redirect user back to /login page
+        return 1
+    else:
 
-    return
+        
+        return 0
 
 # This is signup data I mess up
 @app.route("/singupData", methods=["POST"]) # Only post method
 def logging_userData():
     forumData = request.form
-
-
     # Can we do a preload of html here or we need to do that in the frontend?
     
     # Some how get data from the form 
     # Waiting for frontend
     username = ""
     password = ""
-
     # probnley should have a loading screen here maybe
     
     # this is suppose to clean/ check for bad account and password
