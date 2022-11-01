@@ -40,9 +40,11 @@ def homepage(): # view function
     '''
 @app.route("/login", methods=["GET"]) # Only get method
 def loginPage():
-    return render_template("login.html", input="/loginData", script="") # Files can be served easier with static files check flask documenation
-
     # alert will be made when password is wrong or change the div box text to have sub text
+    # suggestion will be to use cookie to help checking if the login faill 
+    # another option will be me senting post request and make it render a differnt valye in the login box when the loginData fail to get datas
+    # [Jacky]
+    return render_template("login.html", input="/loginData", script="") # Files can be served easier with static files check flask documenation
 # God I hate python
 
 @app.route("/loginData", methods=["POST", "GET"])
@@ -73,7 +75,7 @@ def user_login():
         # Let redirect user back to /login page
         return redirect("/login")
     else:
-
+    # If the user name is there
         
         return 0
 
