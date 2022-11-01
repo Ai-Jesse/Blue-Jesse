@@ -1,6 +1,7 @@
 # from urllib import request
+import code
 from API import MongoDB_wrapper, Security
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, request, url_for
 from pymongo import MongoClient
 
 import json
@@ -8,8 +9,11 @@ import json
 
 # Just added gpg to my second laptop let see if this works[#Jacky]
 
+
+# Web Application name: blue_Jesse
+name = "blue_Jesse"
 # Setting up Database for the project
-client = MongoClient("mongo")
+client = MongoClient("mongo")[name]
 mongo = MongoDB_wrapper(client)
 print("mongoDB is up I think")
 
@@ -18,7 +22,7 @@ security = Security()
 print("Security is setup I think")
 
 # Setting up the App
-app = Flask("blue_Jesse")
+app = Flask(name)
 print("App running I think")
 
 
@@ -36,17 +40,22 @@ def homepage(): # view function
     '''
 @app.route("/login", methods=["GET"]) # Only get method
 def loginPage():
-    return render_template("login.html") # Files can be served easier with static files check flask documenation
+    return render_template("login.html", input="/loginData", script="") # Files can be served easier with static files check flask documenation
 
+    # alert will be made when password is wrong or change the div box text to have sub text
 # God I hate python
 
 @app.route("/loginData", methods=["POST", "GET"])
 def user_login():
-    # forumData = request.form
+    forumData = request.form
 
-    username = ""
-    password = ""
+    username = forumData["username"]
+    password = forumData["password"]
 
+    # Checking if the username is recived correctly [# Jacky]
+    # print(username, flush=True)
+
+    # Plan
     # 1. Search for the user
     # 2. Check if the user exist in database
     #   2a. If the user exist redirect to /userpage
@@ -62,7 +71,7 @@ def user_login():
     if value == None:
         # If the user does not exist
         # Let redirect user back to /login page
-        return redirect("/changelog")
+        return redirect("/login")
     else:
 
         
