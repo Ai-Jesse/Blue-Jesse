@@ -1,4 +1,4 @@
-from urllib import request
+# from urllib import request
 from API import MongoDB_wrapper, Security
 from flask import Flask, render_template, redirect
 from pymongo import MongoClient
@@ -40,9 +40,9 @@ def loginPage():
 
 # God I hate python
 
-@app.route("/loginData", methods=["POST"])
+@app.route("/loginData", methods=["POST", "GET"])
 def user_login():
-    forumData = request.form
+    # forumData = request.form
 
     username = ""
     password = ""
@@ -62,7 +62,7 @@ def user_login():
     if value == None:
         # If the user does not exist
         # Let redirect user back to /login page
-        return 1
+        return redirect("/changelog")
     else:
 
         

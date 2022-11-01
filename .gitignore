@@ -4,3 +4,4 @@ venv/*
 log.txt
 *.swap
 tool/*
+.env
