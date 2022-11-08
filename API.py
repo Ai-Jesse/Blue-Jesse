@@ -1,7 +1,6 @@
 # For now everyhting is in one file
 
-
-from asyncio import current_task
+import hashlib
 import json # currently used by: Security class
 
 # This class will be used for api class that will be needed through out the project 
@@ -19,7 +18,9 @@ class MongoDB_wrapper:
     def __init__(self, mongoDB):
         self.database = mongoDB
         return
-    def insert(self, InputData, TableName):
+    def insert(self, InputData, tableName):
+        currentTable = self.database[tableName]
+        currentTable.insert_one(InputData)
         return
     def search(self, InputData, tableName):
         currentTable = self.database[tableName]
@@ -28,10 +29,15 @@ class MongoDB_wrapper:
 
 
 
-# Security check goes here
+# Security check/things goes here
 class Security:
     def __init__(self):
         return
     def vaild_post_data(self,ExectedKeys:list, IncomingData:json):
         return
-    
+    def hash_265(self, inputData):
+        hashin = hashlib.sha256(inputData)
+        return hashin.hexdigest() # return the has value
+    def password_and_user_checker(self, username, password):
+        bad_characters = ["/", "<", ">", ";", ")", "(", "&"]
+        return bad_characters in username or bad_characters in password
