@@ -1,14 +1,14 @@
 <html> 
-    <form action="{{input2}}" id="signup-form" method="post" enctype="multipart/form-data">
+    <form action="{{signup_post_path}}" id="signup-form" method="post" enctype="multipart/form-data">
         <label for="signup-username">Username: </label>
-        <textarea id="signup-username" name="new-username"></textarea>
+        <input type="text" id="signup-username" name="new-username"></textarea>
         <br/>
         <label for="signup-password">Password: </label>
-        <textarea id="signup-password" name="new-password"></textarea>
+        <input type="password" id="signup-password" name="new-password"></input>
         <br/>
         <input type="submit" value="Signup">
     </form>
 
         <button onclick="alert('This is a test')"> Forgot Password</button>
-        <button id = "login" onclick=window.location.href="{{input}}">Returning User?</button>
+        <button id = "login" onclick=window.location.href="{{login_path}}">Returning User?</button>
         </html>

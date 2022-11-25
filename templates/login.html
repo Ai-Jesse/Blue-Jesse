@@ -2,24 +2,25 @@
 <!DOCTYPE html>
 <html>
     <head>        
-        <link rel="stylesheet" href="{{input3}}" type="text/css"/>
+        <link rel="stylesheet" href="{{css_path}}" type="text/css"/>
     </head>
     <body>
     <div class="start-page"> </div>
     <div id ="login-form">
-    <form action="{{input2}}" id="login-form" method="post" enctype="multipart/form-data">
+        <h3>{{display_message}}</h3>
+    <form action="{{login_post_path}}" id="login-form" method="post" enctype="multipart/form-data">
         <label for="login-username">Username: </label>
-        <textarea id="login-username" name="ret-username"></textarea>
+        <input type="text" id="login-username" name="ret-username"></input>
         <br/>
         <label for="login-password">Password: </label>
-        <textarea id="login-password" name="ret-password"></textarea>
+        <input type="password" id="login-password" name="ret-password"></input>
         <br/>
         <input type="submit" value="Login">
     </form>
     <br><br>
     <div id="signing">
         New User?
-        <button id = "signup" onclick=window.location.href="{{input}}">Signup</button>
+        <button id = "signup" onclick=window.location.href="{{signup_path}}">Signup</button>
     </div>
 </div>
     </body>
