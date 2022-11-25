@@ -1,9 +1,8 @@
 # from urllib import request
 import code
 from API import MongoDB_wrapper, Security
-from flask import Flask, render_template, redirect, request, url_for
+from flask import Flask, render_template, redirect, request, url_for, session
 from pymongo import MongoClient
-
 import json
 
 
@@ -30,21 +29,21 @@ print("App running I think")
 def homepage(): # view function
     print("Someone is at the homepage", flush=True)
     return render_template("index.html", input="/login")
-    '''
-    When calling render_templates it search for the html files in the template folder
-    you can pass in a key value pair to override the value at the localtion of the html template example:
-    ----html----
-    e.g. {{test}}
-    ----html----
-    render_template(html, test=5) [#Jacky]
-    '''
+    # When calling render_templates it search for the html files in the template folder
+    # you can pass in a key value pair to override the value at the localtion of the html template example:
+    # ----html----
+    # e.g. {{test}}
+    # ----html----
+    # render_template(html, test=5) [#Jacky]
 @app.route("/login", methods=["GET"]) # Only get method
 def loginPage():
     # alert will be made when password is wrong or change the div box text to have sub text
     # suggestion will be to use cookie to help checking if the login faill 
     # another option will be me senting post request and make it render a differnt valye in the login box when the loginData fail to get datas
     # [Jacky]
-    return render_template("login.html", input="/loginData", script="") # Files can be served easier with static files check flask documenation
+    login_status = request.cookies.get("login_status", "Please Login")
+    return render_template("login.html", input="/loginData", display_message=login_status)
+    # return render_template("login.html", input="/loginData") # Files can be served easier with static files check flask documenation
 # God I hate python
 
 @app.route("/loginData", methods=["POST", "GET"])
@@ -65,23 +64,30 @@ def user_login():
     # [Jacky]
 
     searchable_able = {"username" : username, "password": password}
-    # test
     # Search in the user finish 
     value = mongo.search(searchable_able, "user")
-
     # Check if the user is in database
     if value == None:
         # If the user does not exist
         # Let redirect user back to /login page
-        return redirect("/login")
+        # TODO: Write data to session cookie
+
+        redirect_respond = redirect("/login", code=302)
+        redirect_respond.set_cookie("login_status", "No such user")
+        return redirect_respond
+    elif value["password"] != searchable_able["password"]:
+        # TODO: Write data to session cookie about wrong password
+        redirect_respond = redirect("/login", code=302)
+        redirect_respond.set_cookie("log_status", "Wrong password")
+        return redirect_respond
     else:
     # If the user name is there
-        
-        return 0
+        # redirect datas using cookies
+        return redirect(url_for("display_userhomepage", userid="Hello"))
 
 # This is signup data I mess up
-@app.route("/singupData", methods=["POST"]) # Only post method
-def logging_userData():
+@app.route("/signupData", methods=["POST"]) # Only post method
+def signup_userData():
     forumData = request.form
     # Can we do a preload of html here or we need to do that in the frontend?
     
@@ -103,8 +109,10 @@ def logging_userData():
         # Insert the hash password
         MongoDB_wrapper.insert(user)
         # print(format) # User name should be max 12 characters
-        # special characters that we don't want in username: &, ~, /, <,   >, ;, [space]
+        # This should be done in the frontend ->
+        # special characters that we don't want in username: &, ~, /, <,   >, ;, [space]Hello
         # direct the user to the user homepage [#Jacky]
+        redirect("/login", code=302)
 
 @app.route("/changelog", methods=["POST", "GET"])
 def display_changelog():
@@ -116,13 +124,11 @@ def display_changelog():
     # This will use the template feature of flask and use that to display a text file that I will write on the side for all the changes I made and the goals this can also be used to test
     return render_template("changelog.html", change=change_data)
 
-@app.route("/userpage")
-def display_userhomepage():
+@app.route("/userpage/<userid>")
+def display_userhomepage(userid):
     # display the userhomepage
-
     # Using render_template I can use the same html for all user to make them feel special
-
     # Grab username
-
-    return
+    # Change later for the actual html
+    return render_template("QuickTest.html", value=userid)
 # app.run() # Don't use this for final product [#Jacky]
