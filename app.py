@@ -1,3 +1,4 @@
+
 # from urllib import request
 import code
 from API import MongoDB_wrapper, Security
@@ -14,6 +15,8 @@ name = "blue_Jesse"
 # Setting up Database for the project
 client = MongoClient("mongo")[name]
 mongo = MongoDB_wrapper(client)
+css_file = "static/style.css"
+
 print("mongoDB is up I think")
 
 # Setting up the Security
@@ -28,13 +31,26 @@ print("App running I think")
 @app.route("/") # converts normal function to view function
 def homepage(): # view function
     print("Someone is at the homepage", flush=True)
-    return render_template("index.html", input="/login")
-    # When calling render_templates it search for the html files in the template folder
-    # you can pass in a key value pair to override the value at the localtion of the html template example:
-    # ----html----
-    # e.g. {{test}}
-    # ----html----
-    # render_template(html, test=5) [#Jacky]
+    return render_template("index.html", input="/login", input2="/signup", input3="/homepage", input4=css_file)
+
+@app.route("/homepage") # converts normal function to view function
+def home(): # view function
+    print("Someone is at the userpage", flush=True)
+    return render_template("homepage.html", input="/homepage")
+
+@app.route("/signup") # converts normal function to view function
+def login(): # view function
+    print("Someone is at the homepage", flush=True)
+    return render_template("signup.html", input="/login", input2="/signUpData")
+    '''
+    When calling render_templates it search for the html files in the template folder
+    you can pass in a key value pair to override the value at the localtion of the html template example:
+    ----html----
+    e.g. {{test}}
+    ----html----
+    render_template(html, test=5) [#Jacky]
+    '''
+
 @app.route("/login", methods=["GET"]) # Only get method
 def loginPage():
     # alert will be made when password is wrong or change the div box text to have sub text
@@ -42,7 +58,7 @@ def loginPage():
     # another option will be me senting post request and make it render a differnt valye in the login box when the loginData fail to get datas
     # [Jacky]
     login_status = request.cookies.get("login_status", "Please Login")
-    return render_template("login.html", input="/loginData", display_message=login_status)
+    return render_template("signup.html", input="/login", input2="/signUpData", display_message=login_status)
     # return render_template("login.html", input="/loginData") # Files can be served easier with static files check flask documenation
 # God I hate python
 
