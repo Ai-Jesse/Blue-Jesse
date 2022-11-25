@@ -1,4 +1,11 @@
-<html> 
+<!DOCTYPE html>
+<html>
+    <head>        
+        <link rel="stylesheet" href="{{input3}}" type="text/css"/>
+    </head>
+    <body>
+    <div class="start-page"> </div>
+    <div id ="login-form">
     <form action="{{input2}}" id="login-form" method="post" enctype="multipart/form-data">
         <label for="login-username">Username: </label>
         <textarea id="login-username" name="ret-username"></textarea>
@@ -8,6 +15,11 @@
         <br/>
         <input type="submit" value="Login">
     </form>
-        <button> Forgot Password</button>
-        <button id = "signup" onclick=window.location.href="{{input}}">Create a new User</button>
-        </html>
+    <br><br>
+    <div id="signing">
+        New User?
+        <button id = "signup" onclick=window.location.href="{{input}}">Signup</button>
+    </div>
+</div>
+    </body>
+</html>

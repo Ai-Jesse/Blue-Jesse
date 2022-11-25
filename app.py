@@ -38,7 +38,7 @@ def login(): # view function
 
 @app.route("/login", methods=["GET"]) # Only get method
 def loginPage():
-    return render_template("login.html", input="/signup", input2="/loginData") # Files can be served easier with static files check flask documenation
+    return render_template("login.html", input="/signup", input2="/loginData", input3="static/login.css") # Files can be served easier with static files check flask documenation
 
 
 @app.route("/loginData", methods=["POST"]) # Only post method
@@ -55,5 +55,5 @@ def signingup_userData():
 
 
 
-# app.run() # Don't use this for final product [#Jacky]
+app.run() # Don't use this for final product [#Jacky]
 
