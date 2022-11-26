@@ -6,7 +6,6 @@ from flask import Flask, render_template, redirect, request, url_for, session
 from pymongo import MongoClient
 import json
 
-
 # Just added gpg to my second laptop let see if this works[#Jacky]
 
 
@@ -64,11 +63,14 @@ def user_login():
     #   2a. If the user exist redirect to /userpage
     #   2b. If the user does not exist redirect back to /login
     # [Jacky]
-
+    password = security.hash_265(password)
     searchable_able = {"username" : username, "password": password}
     # Search in the user finish 
     value = mongo.search(searchable_able, "user")
     # Check if the user is in database
+
+    print(value, flush=True)
+    print(searchable_able, flush=True)
     if value == None:
         # If the user does not exist
         # Let redirect user back to /login page
@@ -108,8 +110,8 @@ def signup_userData():
     
     # Some how get data from the form 
     # Waiting for frontend
-    username = ""
-    password = ""
+    username = forumData.get("new-username")
+    password = forumData.get("new-password")
     # probnley should have a loading screen here maybe
     
     # this is suppose to clean/ check for bad account and password
