@@ -1,14 +1,26 @@
+<!DOCTYPE html>
 <html> 
-    <form action="{{input2}}" id="signup-form" method="post" enctype="multipart/form-data">
-        <label for="signup-username">Username: </label>
-        <textarea id="signup-username" name="new-username"></textarea>
-        <br/>
-        <label for="signup-password">Password: </label>
-        <textarea id="signup-password" name="new-password"></textarea>
-        <br/>
-        <input type="submit" value="Signup">
-    </form>
-
-        <button onclick="alert('This is a test')"> Forgot Password</button>
-        <button id = "login" onclick=window.location.href="{{input}}">Returning User?</button>
+    <head>
+        <link rel="stylesheet" href="{{input3}}" type="text/css"/>
+    </head>
+    <body>
+        <div class="start-page"> </div>
+        <div id ="signup-form">
+        <form action="{{input2}}" id="signup-form" method="post" enctype="multipart/form-data">
+            <label for="signup-username">Username: </label>
+            <input type="text" id="signup-username" name="new-username"></input>
+            <br/>
+            <label for="signup-password">Password: </label>
+            <input type="password" id="signup-password" name="new-password"></input>
+            <br/>
+            <input id="signup-button" type="submit" value="Signup">
+        </form>
+        <br><br>
+        <div id="logging">
+            Returning User?
+            <!-- <button onclick="alert('This is a test')"> Forgot Password</button> -->
+            <button id = "login" onclick=window.location.href="{{input}}">Login</button>
+        </div>
+        </div>
+    </body>
         </html>

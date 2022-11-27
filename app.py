@@ -15,7 +15,7 @@ name = "blue_Jesse"
 # Setting up Database for the project
 client = MongoClient("mongo")[name]
 mongo = MongoDB_wrapper(client)
-css_file = "static/style.css"
+css_file = "static/styles/index.css"
 
 print("mongoDB is up I think")
 
@@ -31,17 +31,18 @@ print("App running I think")
 @app.route("/") # converts normal function to view function
 def homepage(): # view function
     print("Someone is at the homepage", flush=True)
-    return render_template("index.html", input="/login", input2="/signup", input3="/homepage", input4=css_file)
+    return render_template("index.html", input="/login", input2="/signup", input4=css_file)
 
 @app.route("/homepage") # converts normal function to view function
 def home(): # view function
     print("Someone is at the userpage", flush=True)
-    return render_template("homepage.html", input="/homepage")
+    return render_template("homepage.html", input="username", input2="static/styles/homepage.css", 
+    gameLevel="level", recorderCount="123", xp="1234", hp="220", leaderboard="/leaderboard", store="/store", exp="/explore")
 
 @app.route("/signup") # converts normal function to view function
-def login(): # view function
+def signup(): # view function
     print("Someone is at the homepage", flush=True)
-    return render_template("signup.html", input="/login", input2="/signUpData")
+    return render_template("signup.html", input="/login", input2="/signUpData", input3="static/styles/signup.css")
     '''
     When calling render_templates it search for the html files in the template folder
     you can pass in a key value pair to override the value at the localtion of the html template example:
@@ -58,7 +59,7 @@ def loginPage():
     # another option will be me senting post request and make it render a differnt valye in the login box when the loginData fail to get datas
     # [Jacky]
     login_status = request.cookies.get("login_status", "Please Login")
-    return render_template("signup.html", input="/login", input2="/signUpData", display_message=login_status)
+    return render_template("login.html", input="/signup", input2="/signUpData", input3="static/styles/login.css", display_message=login_status)
     # return render_template("login.html", input="/loginData") # Files can be served easier with static files check flask documenation
 # God I hate python
 
