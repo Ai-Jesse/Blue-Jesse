@@ -79,14 +79,15 @@ def user_login():
         redirect_respond = redirect("/login", code=302)
         redirect_respond.set_cookie("login_status", "No such user")
         return redirect_respond
-    elif value["password"] != searchable_able["password"]:
-        # TODO: Write data to session cookie about wrong password
+    elif value["username"] == searchable_able["username"]:
+        # TODO: already exist username
         redirect_respond = redirect("/login", code=302)
-        redirect_respond.set_cookie("log_status", "Wrong password")
+        redirect_respond.set_cookie("log_status", "username already exist stop")
         return redirect_respond
     else:
     # If the user name is there
-        # redirect datas using cookies
+    # redirect datas using cookies
+
         return redirect(url_for("display_userhomepage", userid="Hello"))
 
 # This is signup
@@ -121,10 +122,17 @@ def signup_userData():
     else:    
         # Let hash the password
         hashed_password = security.hash_265(password)
+
+
         # Structure the data input to database
-        user = {"username": username, "password": hashed_password}
+        user = {"username": username, "password": hashed_password, "token": None }
         # Insert the hash password
         mongo.insert(user, "user")
+
+
+        # stored basic user data
+
+
         # print(format) # User name should be max 12 characters
         # This should be done in the frontend ->
         # special characters that we don't want in username: &, ~, /, <,   >, ;, [space]Hello

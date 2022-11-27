@@ -1,7 +1,11 @@
 # For now everyhting is in one file
 
+# Currently used by: Security class
 import hashlib
-import json # currently used by: Security class
+import json
+import random
+import string
+# Currently used by MongoDB
 
 # This class will be used for api class that will be needed through out the project 
 # make sure to make keep thing neat and clean
@@ -47,3 +51,8 @@ class Security:
                 return True
         # if it does not
         return False
+    def generate_token(self):
+        pool = string.printable
+        token = random.sample(pool, 13)
+
+        return ""
