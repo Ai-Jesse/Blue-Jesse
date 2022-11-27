@@ -6,7 +6,6 @@ from flask import Flask, render_template, redirect, request, url_for, session
 from pymongo import MongoClient
 import json
 
-
 # Just added gpg to my second laptop let see if this works[#Jacky]
 
 
@@ -39,19 +38,6 @@ def home(): # view function
     return render_template("homepage.html", input="username", input2="static/styles/homepage.css", 
     gameLevel="level", recorderCount="123", xp="1234", hp="220", leaderboard="/leaderboard", store="/store", exp="/explore")
 
-@app.route("/signup") # converts normal function to view function
-def signup(): # view function
-    print("Someone is at the homepage", flush=True)
-    return render_template("signup.html", input="/login", input2="/signUpData", input3="static/styles/signup.css")
-    '''
-    When calling render_templates it search for the html files in the template folder
-    you can pass in a key value pair to override the value at the localtion of the html template example:
-    ----html----
-    e.g. {{test}}
-    ----html----
-    render_template(html, test=5) [#Jacky]
-    '''
-
 @app.route("/login", methods=["GET"]) # Only get method
 def loginPage():
     # alert will be made when password is wrong or change the div box text to have sub text
@@ -59,17 +45,16 @@ def loginPage():
     # another option will be me senting post request and make it render a differnt valye in the login box when the loginData fail to get datas
     # [Jacky]
     login_status = request.cookies.get("login_status", "Please Login")
-    return render_template("login.html", input="/signup", input2="/signUpData", input3="static/styles/login.css", display_message=login_status)
+    return render_template("login.html", signup_path="/signup", login_post_path="/loginData", css_path="static/styles/login.css", display_message=login_status)
     # return render_template("login.html", input="/loginData") # Files can be served easier with static files check flask documenation
 # God I hate python
 
 @app.route("/loginData", methods=["POST", "GET"])
 def user_login():
     forumData = request.form
-
-    username = forumData["username"]
-    password = forumData["password"]
-
+    print(forumData, flush=True)
+    username = forumData.get("ret-username", "")
+    password = forumData.get("ret-password", "")
     # Checking if the username is recived correctly [# Jacky]
     # print(username, flush=True)
 
@@ -79,11 +64,14 @@ def user_login():
     #   2a. If the user exist redirect to /userpage
     #   2b. If the user does not exist redirect back to /login
     # [Jacky]
-
+    password = security.hash_265(password)
     searchable_able = {"username" : username, "password": password}
     # Search in the user finish 
     value = mongo.search(searchable_able, "user")
     # Check if the user is in database
+
+    print(value, flush=True)
+    print(searchable_able, flush=True)
     if value == None:
         # If the user does not exist
         # Let redirect user back to /login page
@@ -102,16 +90,29 @@ def user_login():
         # redirect datas using cookies
         return redirect(url_for("display_userhomepage", userid="Hello"))
 
-# This is signup data I mess up
+# This is signup
+@app.route("/signup", methods=["GET"]) # Only get method
+def signup():
+    # alert will be made when password is wrong or change the div box text to have sub text
+    # suggestion will be to use cookie to help checking if the login faill
+    # another option will be me senting post request and make it render a differnt valye in the login box when the loginData fail to get datas
+    # [Jacky]
+    return render_template("signup.html", signup_post_path="/signupData", login_path="/login", css_path="static/styles/signup.css")
+    # return render_template("login.html", input="/loginData") # Files can be served easier with static files check flask documenation
+# God I hate python
+
+
 @app.route("/signupData", methods=["POST"]) # Only post method
 def signup_userData():
     forumData = request.form
+    print("form data", flush=True)
+    print(forumData, flush=True)
     # Can we do a preload of html here or we need to do that in the frontend?
     
     # Some how get data from the form 
     # Waiting for frontend
-    username = ""
-    password = ""
+    username = forumData.get("new-username")
+    password = forumData.get("new-password")
     # probnley should have a loading screen here maybe
     
     # this is suppose to clean/ check for bad account and password
@@ -124,12 +125,12 @@ def signup_userData():
         # Structure the data input to database
         user = {"username": username, "password": hashed_password}
         # Insert the hash password
-        MongoDB_wrapper.insert(user)
+        mongo.insert(user, "user")
         # print(format) # User name should be max 12 characters
         # This should be done in the frontend ->
         # special characters that we don't want in username: &, ~, /, <,   >, ;, [space]Hello
         # direct the user to the user homepage [#Jacky]
-        redirect("/login", code=302)
+        return redirect("/login", code=302)
 
 @app.route("/changelog", methods=["POST", "GET"])
 def display_changelog():

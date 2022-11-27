@@ -2,12 +2,13 @@
 <!DOCTYPE html>
 <html>
     <head>        
-        <link rel="stylesheet" href="{{input3}}" type="text/css"/>
+        <link rel="stylesheet" href="{{css_path}}" type="text/css"/>
     </head>
     <body>
     <div class="start-page"> </div>
     <div id ="login-form">
-    <form action="{{input2}}" id="login-form" method="post" enctype="multipart/form-data">
+        <h3>{{display_message}}</h3>
+    <form action="{{login_post_path}}" id="login-form" method="post" enctype="multipart/form-data">
         <label for="login-username">Username: </label>
         <input type="text" id="login-username" name="ret-username"></input>
         <br/>
@@ -19,7 +20,7 @@
     <br><br>
     <div id="signing">
         New User?
-        <button id = "signup" onclick=window.location.href="{{input}}">Signup</button>
+        <button id = "signup" onclick=window.location.href="{{signup_path}}">Signup</button>
     </div>
 </div>
     </body>

@@ -36,8 +36,14 @@ class Security:
     def vaild_post_data(self,ExectedKeys:list, IncomingData:json):
         return
     def hash_265(self, inputData):
-        hashin = hashlib.sha256(inputData)
-        return hashin.hexdigest() # return the has value
+        encoding_input = bytes(inputData, "utf-8")
+        hashin = hashlib.sha256(encoding_input)
+        return hashin.hexdigest() # return the hash value
     def password_and_user_checker(self, username, password):
         bad_characters = ["/", "<", ">", ";", ")", "(", "&"]
-        return bad_characters in username or bad_characters in password
+        for character in bad_characters:
+            # checking username and password
+            if character in username or character in password:
+                return True
+        # if it does not
+        return False

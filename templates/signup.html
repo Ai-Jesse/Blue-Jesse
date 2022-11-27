@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html> 
     <head>
-        <link rel="stylesheet" href="{{input3}}" type="text/css"/>
+        <link rel="stylesheet" href="{{css_path}}" type="text/css"/>
     </head>
     <body>
         <div class="start-page"> </div>
         <div id ="signup-form">
-        <form action="{{input2}}" id="signup-form" method="post" enctype="multipart/form-data">
+    <form action="{{signup_post_path}}" id="signup-form" method="post" enctype="multipart/form-data">
             <label for="signup-username">Username: </label>
             <input type="text" id="signup-username" name="new-username"></input>
             <br/>
@@ -19,7 +19,7 @@
         <div id="logging">
             Returning User?
             <!-- <button onclick="alert('This is a test')"> Forgot Password</button> -->
-            <button id = "login" onclick=window.location.href="{{input}}">Login</button>
+            <button id = "login" onclick=window.location.href="{{login_path}}">Login</button>
         </div>
         </div>
     </body>
