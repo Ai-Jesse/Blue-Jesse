@@ -1,7 +1,7 @@
 
 # from urllib import request
 import code
-from API import MongoDB_wrapper, Security
+from API import MongoDB_wrapper, Security, Helper
 from flask import Flask, render_template, redirect, request, url_for, session
 from pymongo import MongoClient
 import json
@@ -22,6 +22,8 @@ print("mongoDB is up I think")
 security = Security()
 print("Security is setup I think")
 
+# Setting up Helper
+helper = Helper()
 # Setting up the App
 app = Flask(name)
 print("App running I think")
@@ -123,16 +125,25 @@ def signup_userData():
         # Let hash the password
         hashed_password = security.hash_265(password)
 
-
+        autho_token = security.generate_token(username, request.user_agent)
         # Structure the data input to database
-        user = {"username": username, "password": hashed_password, "token": None }
+        user = {"username": username, "password": hashed_password, "token": autho_token }
         # Insert the hash password
         mongo.insert(user, "user")
 
+        # Set up the database for user
+        path = helper.generate_path()
+        temp_path = {"authorize_token": autho_token, "path": path}
+        mongo.insert(temp_path,  "temp_path")
+
 
         # stored basic user data
+        user_authorized_token = {"username": username, "token": autho_token}
+        mongo.insert(user_authorized_token, "user_authorized_token")
 
 
+        # user states
+        user_states = {"authorize_token": autho_token, "username": username, "about_me": None, "profile_picture": None, "highest_point": None}
         # print(format) # User name should be max 12 characters
         # This should be done in the frontend ->
         # special characters that we don't want in username: &, ~, /, <,   >, ;, [space]Hello
