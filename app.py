@@ -71,19 +71,21 @@ def user_login():
     #   2a. If the user exist redirect to /userpage
     #   2b. If the user does not exist redirect back to /login
     # [Jacky]
-    password = security.hash_265(password)
-    searchable_able = {"username": username, "password": password}
+    searchable_able = {"username": username}
     # Search in the user finish 
     value = mongo.search(searchable_able, "user")
     # Check if the user is in database
 
     print(value, flush=True)
     print(searchable_able, flush=True)
-    if value == None:
+
+    value = security.check_password(password, value.get("password", None))
+
+
+    if not value:
         # If the user does not exist
         # Let redirect user back to /login page
         # TODO: Write data to session cookie
-
         redirect_respond = redirect("/login", code=302)
         redirect_respond.set_cookie("login_status", "No such user")
         return redirect_respond
@@ -136,7 +138,7 @@ def signup_userData():
         return redirect("/sigup", code=302) # redirect the user to login page after a bad username and password
     else:    
         # Let hash the password
-        hashed_password = security.hash_265(password)
+        hashed_password = security.hash_and_salt_password(password)
 
         autho_token = security.generate_token(username, request.user_agent)
         # Structure the data input to database
@@ -181,7 +183,7 @@ def display_changelog():
 def display_userhomepage(path):
     # display the userhomepage
     # Using render_template I can use the same html for all user to make them feel special
-    # Grab username
+    # Grab usernameq
     # Change later for the actual html
-    return render_template("QuickTest.html", value=path)
+    return render_template("homepage.html", value=path)
 # app.run() # Don't use this for final product [#Jacky]

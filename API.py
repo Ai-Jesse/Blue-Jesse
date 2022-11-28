@@ -7,7 +7,7 @@ import random
 import string
 import base64
 import time
-
+import bcrypt
 
 # Currently used by MongoDB
 
@@ -112,3 +112,8 @@ class Security:
         token = encoded_username + timestamp + random_characters + encoded_useragent
         hash_token = hashlib.sha256(token)
         return hash_token.hexdigest()
+    def hash_and_salt_password(self, password):
+        hash_salt = bcrypt.hashpw(password, bcrypt.gensalt())
+        return hash_salt
+    def check_password(self, password, hashed_password):
+        return bcrypt.checkpw(password, hashed_password)
