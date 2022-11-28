@@ -36,8 +36,8 @@ def homepage():  # view function
 def home():  # view function
     print("Someone is at the userpage", flush=True)
     return render_template("homepage.html", input="username", input2="static/styles/homepage.css",
-                           gameLevel="level", recorderCount="123", xp="1234", hp="220", leaderboard="/leaderboard",
-                           store="/store", exp="/explore")
+                           gamesCount="999", bestCount="123", fruitCount="1234", killCount="220", leaderboard="/leaderboard",
+                           single="/singlePlayer", lobby="/lobby")
 
 
 @app.route("/login", methods=["GET"])  # Only get method
@@ -141,6 +141,9 @@ def signup_userData():
         # direct the user to the user homepage [#Jacky]
         return redirect("/login", code=302)
 
+@app.route("/leaderboard",methods=["GET"])
+def display_leaderBoard():
+    return render_template("leaderboard.html")
 
 @app.route("/changelog", methods=["POST", "GET"])
 def display_changelog():
