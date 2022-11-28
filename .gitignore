@@ -7,3 +7,4 @@ tool/*
 .env
 .idea/*
 .idea
+__pycache__/*

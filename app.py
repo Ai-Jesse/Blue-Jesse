@@ -1,6 +1,6 @@
 # from urllib import request
 import code
-from API import MongoDB_wrapper, Security
+from API import MongoDB_wrapper, Security, Helper
 from flask import Flask, render_template, redirect, request, url_for, session
 from pymongo import MongoClient
 import json
@@ -21,6 +21,8 @@ print("mongoDB is up I think")
 security = Security()
 print("Security is setup I think")
 
+# Setting up Helper
+helper = Helper()
 # Setting up the App
 app = Flask(name)
 print("App running I think")
@@ -85,15 +87,19 @@ def user_login():
         redirect_respond = redirect("/login", code=302)
         redirect_respond.set_cookie("login_status", "No such user")
         return redirect_respond
-    elif value["password"] != searchable_able["password"]:
-        # TODO: Write data to session cookie about wrong password
-        redirect_respond = redirect("/login", code=302)
-        redirect_respond.set_cookie("log_status", "Wrong password")
-        return redirect_respond
     else:
-        # If the user name is there
-        # redirect datas using cookies
-        return redirect(url_for("display_userhomepage", userid="Hello"))
+    # If the user name is there
+    # redirect datas using cookies
+        new_token = security.generate_token(username, request.user_agent)
+        helper.new_login(mongo, new_token, username)
+        print("new token: " + str(new_token), flush=True)
+        search_path = {"authorize_token": new_token}
+        for i in mongo.database["temp_path"].find():
+            print("temp_path: ", flush=True)
+            print(i, flush=True)
+
+        path = mongo.search(search_path, "temp_path").get("path")
+        return redirect(url_for("display_userhomepage", path=path))
 
 
 # This is signup
@@ -125,16 +131,34 @@ def signup_userData():
     # probnley should have a loading screen here maybe
 
     # this is suppose to clean/ check for bad account and password
-    if security.password_and_user_checker(username=username, password=password):
+    if security.password_and_user_checker(username=username, password=password) or security.duplicate_username(username=username, database=mongo):
         # if the input is bad we redirect it to the login page
-        return redirect("/login", code=302)  # redirect the user to login page after a bad username and password
-    else:
+        return redirect("/sigup", code=302) # redirect the user to login page after a bad username and password
+    else:    
         # Let hash the password
         hashed_password = security.hash_265(password)
+
+        autho_token = security.generate_token(username, request.user_agent)
         # Structure the data input to database
-        user = {"username": username, "password": hashed_password}
+        user = {"username": username, "password": hashed_password, "old_token": autho_token }
         # Insert the hash password
         mongo.insert(user, "user")
+
+        # Set up the database for user
+        path = helper.generate_path()
+        temp_path = {"authorize_token": autho_token, "path": path}
+        mongo.insert(temp_path,  "temp_path")
+
+
+        # stored basic user data
+        user_authorized_token = {"username": username, "authorize_token": autho_token}
+        mongo.insert(user_authorized_token, "user_authorize_token")
+
+
+        # user states
+        user_states = {"authorize_token": autho_token, "username": username, "about_me": None, "profile_picture": None, "highest_point": None}
+        mongo.insert(user_states, "user_stat")
+
         # print(format) # User name should be max 12 characters
         # This should be done in the frontend ->
         # special characters that we don't want in username: &, ~, /, <,   >, ;, [space]Hello
@@ -153,13 +177,11 @@ def display_changelog():
 
     # This will use the template feature of flask and use that to display a text file that I will write on the side for all the changes I made and the goals this can also be used to test
     return render_template("changelog.html", change=change_data)
-
-
-@app.route("/userpage/<userid>")
-def display_userhomepage(userid):
+@app.route("/userpage/<path>")
+def display_userhomepage(path):
     # display the userhomepage
     # Using render_template I can use the same html for all user to make them feel special
     # Grab username
     # Change later for the actual html
-    return render_template("QuickTest.html", value=userid)
+    return render_template("QuickTest.html", value=path)
 # app.run() # Don't use this for final product [#Jacky]
