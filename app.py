@@ -41,5 +41,16 @@ def logging_userData():
 
 
 
+<<<<<<< Updated upstream
 # app.run() # Don't use this for final product [#Jacky]
 
+=======
+@app.route("/userpage/<userid>")
+def display_userhomepage(userid):
+    # display the userhomepage
+    # Using render_template I can use the same html for all user to make them feel special
+    # Grab username
+    # Change later for the actual html
+    return render_template("QuickTest.html", value=userid)
+app.run() # Don't use this for final product [#Jacky]
+>>>>>>> Stashed changes
