@@ -1,0 +1,27 @@
+
+<!DOCTYPE html>
+<html>
+    <head>        
+        <link rel="stylesheet" href="{{css_path}}" type="text/css"/>
+    </head>
+    <body>
+    <div class="start-page"> </div>
+    <div id ="login-form">
+        <h3>{{display_message}}</h3>
+    <form action="{{login_post_path}}" id="login-form" method="post" enctype="multipart/form-data">
+        <label for="login-username">Username: </label>
+        <input type="text" id="login-username" name="ret-username"></input>
+        <br/>
+        <label for="login-password">Password: </label>
+        <input type="password" id="login-password" name="ret-password"></input>
+        <br/>
+        <input id="login-button" type="submit" value="Login">
+    </form>
+    <br><br>
+    <div id="signing">
+        New User?
+        <button id = "signup" onclick=window.location.href="{{signup_path}}">Signup</button>
+    </div>
+</div>
+    </body>
+</html>
