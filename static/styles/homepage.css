@@ -50,7 +50,7 @@ td{
     color: #d3d3d3
 }
 
-#exp{
+#single{
     background-color:#D3D3D3; 
     border: none;
     color: black;
@@ -65,7 +65,7 @@ td{
     border-radius: 0.3em;
 }
 
-#store{
+#lobby{
     background-color:#D3D3D3; 
     border: none;
     color: black;
