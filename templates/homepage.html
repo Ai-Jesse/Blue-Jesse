@@ -1,17 +1,40 @@
 <!DOCTYPE html>
-<h1> Welcome!</h1>
+<html>
+<head>
+    <link rel="stylesheet" href="{{input2}}" type="text/css"/>
+</head>
+<body>
+    <div id = "header">
+        <h1> Welcome, {{input}}!</h1>
+    </div>
+    
+    <div class="profile">
+        <div id="profile-pic">
+            <image id="profileImage" src="static/images/defaultPic.jpeg" />
+            <br>
+            <input id="imageUpload" type="file" required="" capture hidden/>
+            <label for ="imageUpload">Edit Profile</label>
+         </div>
+ 
+        <div id="stats">
+        <table>
+            <tr>
+                <td>Total Game Play: {{gamesCount}}</td>
+                <td>Longest Record: {{bestCount}}</td>
+            </tr>
+            <tr>
+                <td>Total Fruit Eat: {{fruitCount}}</td>
+                <td>Total Snake Kill: {{killCount}}</td>
+            </tr>
+        </table>
+        </div>
+    </div>
 
-<div class="sidebar">
-    <a href="">Profile</a>
-    <a href="">Leaderboard</a>
-    <a href="">Change Theme</a>
-    <a href="">Get Help</a>
-    <a href="">Store</a>
-</div>
 <div class="start">
-
-    <button id="exp-alone">Explore alone?</button>
-    <button id="exp-tgt">Explore with a friend?</button>
+    <button id="single" onclick="{{single}}">Single Player</button>
+    <button id="lobby" onclick="{{lobby}}">Create Lobby</button>
+    <button id="leaderboard" onclick="{{leaderboard}}">Leaderboard</button>
 </div>
+</body>
+</html>
 
-<span onclick="openNav()">Open</span>
