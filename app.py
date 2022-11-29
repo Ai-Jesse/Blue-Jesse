@@ -145,6 +145,17 @@ def signup_userData():
 def display_leaderBoard():
     return render_template("leaderboard.html")
 
+@app.route("/rank",methods=["GET"])
+def ranked_users():
+    # rank = [{"username":"a","highest_point":123},{"username":"b","highest_point":122},{"username":"c","highest_point":121}]
+    scores = mongo.database["user_stat"]
+    rank = scores.find({},{"authorize_token": 0, "username": 1, "about_me": 0, "profile_picture": 0, "highest_point": 1})
+    def sortkey(score):
+        return score["highest_point"]
+
+    rank.sort(key=sortkey,reverse=True)
+    return rank
+
 @app.route("/changelog", methods=["POST", "GET"])
 def display_changelog():
     change_data = open("changelogs.txt", "r").readlines()
@@ -162,4 +173,4 @@ def display_userhomepage(userid):
     # Grab username
     # Change later for the actual html
     return render_template("QuickTest.html", value=userid)
-# app.run() # Don't use this for final product [#Jacky]
+app.run() # Don't use this for final product [#Jacky]
