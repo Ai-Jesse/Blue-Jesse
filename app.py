@@ -171,13 +171,13 @@ def display_leaderBoard():
 
 @app.route("/rank",methods=["GET"])
 def ranked_users():
-    # rank = [{"username":"a","highest_point":123},{"username":"b","highest_point":122},{"username":"c","highest_point":121}]
+    # rank = [{"username":"a","highest_point":123},{"username":"c","highest_point":121},{"username":"b","highest_point":122}]
     scores = mongo.database["user_stat"]
     rank = scores.find({},{"authorize_token": 0, "username": 1, "about_me": 0, "profile_picture": 0, "highest_point": 1})
     def sortkey(score):
         return score["highest_point"]
 
-    rank.sort(key=sortkey,reverse=True)
+    rank = sorted(rank,key=sortkey,reverse=True)
     return rank
 
 @app.route("/changelog", methods=["POST", "GET"])
