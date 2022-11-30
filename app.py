@@ -196,5 +196,5 @@ def display_userhomepage(path):
     # Change later for the actual html
 
     return render_template("QuickTest.html", value=path)
-# app.run() # Don't use this for final product [#Jacky]
+app.run() # Don't use this for final product [#Jacky]
 

@@ -1,0 +1,47 @@
+/* Gold */
+.row:nth-child(1) {background: gold;}
+/* Silver */
+.row:nth-child(2) {background: #c0c0c0;}
+/* Bronze */
+.row:nth-child(3) {background: #cd7f32;}
+
+body{
+    background-image: linear-gradient(70deg, #ff80ff, #33ffff);
+    font-family: sans-serif;
+    color: #dedede;
+}
+.title{
+        font-family: sans-serif;
+        font-size: 40px;
+        color:#00001a;
+        text-align: center;
+        animation: none;
+        position: relative;
+        left: -30px;
+        top: 20px;
+}
+table {
+  font-family: sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+    padding-right: 40px;
+    padding-top: 25px;
+    padding-bottom: 20px;
+    font-size: 36px;
+    font-family: sans-serif;
+    color: #00001a;
+}
+
+/* Gold */
+tr:nth-child(2) {background: gold;}
+/* Silver */
+tr:nth-child(3) {background: #c0c0c0;}
+/* Bronze */
+tr:nth-child(4) {background: #cd7f32;}
+
+tr:nth-child(n+4) {
+  background-color: #dddddd;
+}
