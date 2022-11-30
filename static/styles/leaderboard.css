@@ -6,14 +6,18 @@
 .row:nth-child(3) {background: #cd7f32;}
 
 body{
-    background-image: linear-gradient(70deg, #ff80ff, #33ffff);
-    font-family: sans-serif;
-    color: #dedede;
+    height: 672px;
+    background-image: linear-gradient(to bottom right,#33ffff,#bf80ff,#ff80ff);
 }
 .title{
         font-family: sans-serif;
         font-size: 40px;
-        color:#00001a;
+        color:#ff5c33;
+        text-shadow:
+        0px 0px 20px black,
+        0px 0px 10px orange,
+        0px 0px 10px orangered,
+        0px 0px 10px red;
         text-align: center;
         animation: none;
         position: relative;
