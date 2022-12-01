@@ -112,3 +112,33 @@ class Security:
         token = encoded_username + timestamp + random_characters + encoded_useragent
         hash_token = hashlib.sha256(token)
         return hash_token.hexdigest()
+
+class SingleGame():
+    def __init__(self, socket):
+        self.socket = socket
+
+    def handle(self, data):
+        self.socket.send(data)
+
+
+class MultiGame():
+    def __init__(self, socket1, socket2):
+        self.socket1 = socket1
+        self.socket2 = socket2
+
+class Lobby():
+    lobbies = []
+
+    def __init__(self, socket):
+        self.socket = [socket]
+        self.lobbies.append(self)
+        self.code = str(random.randint(1000, 9999))
+    
+    def join(self, socket):
+        self.socket.append(socket)
+
+    def handle(self, data):
+        for i in self.socket:
+            i.send(data)
+
+    

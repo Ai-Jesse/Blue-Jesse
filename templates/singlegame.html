@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript" charset="utf-8">
+        const socket = new WebSocket('ws://' + window.location.host + '/singleplayer');
+        socket.onmessage = function (ws_message) {
+            console.log(ws_message)
+        }
+
+        function test() {
+            socket.send("test")
+        }
+        
+    </script>
+</head>
+<body></body>
+
+<div class="start">
+    <button id="single" onclick="test()">Test</button>
+</div>
+</body>
+</html>
+

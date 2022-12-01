@@ -32,7 +32,13 @@
 
 <div class="start">
     <button id="single" onclick=window.location.href="{{single}}">Single Player</button>
-    <button id="lobby" onclick=window.location.href="{{lobby}}">Create Lobby</button>
+    <button id="lobby" onclick=window.location.href="{{newlobby}}">Create Lobby</button>
+    <form action="{{joinlobby}}" id="signup-form" method="post" enctype="multipart/form-data">
+        <label for="room-code">Room Code: </label>
+        <input type="text" id="room-code" name="code"></input>
+        <br/>
+        <input id="enter-button" type="submit" value="Enter">
+    </form>
     <button id="leaderboard" onclick=window.location.href="{{leaderboard}}">Leaderboard</button>
 </div>
 </body>
