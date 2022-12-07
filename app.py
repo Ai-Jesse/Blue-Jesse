@@ -169,7 +169,18 @@ def signup_userData():
 
 @app.route("/leaderboard",methods=["GET"])
 def display_leaderBoard():
-    return render_template("leaderboard.html")
+    return render_template("leaderboard.html",style = "static/styles/leaderboard.css")
+
+@app.route("/rank",methods=["GET"])
+def ranked_users():
+    rank = [{"username":"a","highest_point":123},{"username":"c","highest_point":121},{"username":"b","highest_point":122}]
+    # scores = mongo.database["user_stat"]
+    # rank = scores.find({},{"authorize_token": 0, "username": 1, "about_me": 0, "profile_picture": 0, "highest_point": 1})
+    def sortkey(score):
+        return score["highest_point"]
+
+    rank = sorted(rank,key=sortkey,reverse=True)
+    return rank
 
 @app.route("/changelog", methods=["POST", "GET"])
 def display_changelog():
@@ -179,11 +190,23 @@ def display_changelog():
 
     # This will use the template feature of flask and use that to display a text file that I will write on the side for all the changes I made and the goals this can also be used to test
     return render_template("changelog.html", change=change_data)
-@app.route("/userpage/<path>")
-def display_userhomepage(path):
+@app.route("/userpage/<userid>")
+def display_userhomepage(userid):
     # display the userhomepage
     # Using render_template I can use the same html for all user to make them feel special
     # Grab usernameq
     # Change later for the actual html
+    user_info = {"username":"username","gamesCount":999, "bestCount":123, "fruitCount":1234, "killCount":220} # for test
+    user_info = mongo.search({"username":userid},"user_stat")
+
+    return render_template("homepage.html",
+                           input=user_info["username"],
+                           input2="static/styles/homepage.css",
+                           gamesCount=user_info["gamesCount"],
+                           bestCount=user_info["bestCount"],
+                           fruitCount=user_info["fruitCount"],
+                           killCount=user_info["killCount"],
+                           leaderboard="/leaderboard",
+                           single="/singlePlayer", lobby="/lobby")
+app.run() # Don't use this for final product [#Jacky]
     return render_template("homepage.html", value=path)
-# app.run() # Don't use this for final product [#Jacky]
