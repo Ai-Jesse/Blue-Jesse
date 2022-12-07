@@ -1,6 +1,7 @@
 # from urllib import request
 import code
-from API import MongoDB_wrapper, Security, Helper, SingleGame, MultiGame, Lobby
+from API import MongoDB_wrapper, Security, Helper
+from game import *
 from flask import Flask, render_template, redirect, request, url_for, session
 from pymongo import MongoClient
 import json
@@ -216,7 +217,10 @@ def ws_singleplayer(ws):
 @app.route("/newlobby")
 def new_lobby():
 
-    return render_template("lobby.html", data="new")
+    room = Lobby()
+    code = room.code
+
+    return render_template("lobby.html", data=code)
 
 @app.route("/joinlobby", methods=["POST"])
 def join_lobby():
@@ -224,9 +228,8 @@ def join_lobby():
 
     code = form.get("code")
 
-    for i in Lobby.lobbies:
-        if code == str(i.code):
-            return render_template("lobby.html", data=code)
+    if Lobby.lobbies.get(code, False):
+        return render_template("lobby.html", data=code)
 
     return redirect("/homepage", code = 302)
 
@@ -234,24 +237,29 @@ def join_lobby():
 def ws_host_room(ws):
     room = None
     data = ws.receive()
-    
-    if data == "new":
-        room = Lobby(ws)
-        ws.send(room.code)
+    for code, socket in Lobby.lobbies.items():
+        if code == data and len(socket.socket) < 2:
+            room = socket
+            room.join(ws)
+            break
     else:
-        for i in Lobby.lobbies:
-            if i.code == data and len(i.socket) == 1:
-                room = i
-                room.join(ws)
-                break
+        return
+
+    
     while True:
         data = ws.receive()
-        room.handle(data)
+        room.handle(data, ws)
 
 @app.route("/multigame")
 def multi_game():
 
     return render_template()
+
+@sock.route("/multigame")
+def ws_multi_game(ws):
+
+    #get the room code of lobby, use socket info to create multiplayer game
+    pass
 
 app.run() # Don't use this for final product [#Jacky]
 

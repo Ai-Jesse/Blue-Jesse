@@ -3,8 +3,39 @@
 <head>
     <script type="text/javascript" charset="utf-8">
         const socket = new WebSocket('ws://' + window.location.host + '/lobby');
+        
         socket.onmessage = function (ws_message) {
             console.log(ws_message)
+            console.log(ws_message.data)
+            const message = JSON.parse(ws_message.data);
+            const messageType = message.messageType
+            console.log(ws_message)
+            switch (messageType) {
+                case 'chatMessage':
+                    addMessage(message);
+                    break;
+                default:
+                    console.log("received an invalid WS messageType");
+            }
+        }
+        
+        socket.onclose = function () {
+            socket.send(JSON.stringify({'messageType': 'leave'}));
+        }
+
+        function sendMessage() {
+            const chatBox = document.getElementById("chat-comment")
+            const message = chatBox.value;
+            chatBox.value = ""
+            chatBox.focus()
+            if (message !== "") {
+                socket.send(JSON.stringify({'messageType': 'chatMessage', 'message': message}));
+            }
+        }
+
+        function addMessage(chatMessage) {
+            let chat = document.getElementById('chat');
+            chat.innerHTML += "<b>" + chatMessage['username'] + "</b>: " + chatMessage["message"] + "<br/>";
         }
 
         function initial(data) {
@@ -18,10 +49,16 @@
     </script>
 </head>
 <body onload = "initial('{{data}}')">
-
+<div>{{data}}</div>
 <div class="start">
     <button id="single" onclick="test()">Test</button>
 </div>
+
+<label for="chat-comment">Chat: </label>
+<input id="chat-comment" type="text" name="comment">
+<button onclick="sendMessage()">Send</button>
+
+<div id="chat"></div>
 </body>
 </html>
 
