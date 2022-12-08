@@ -266,11 +266,11 @@ def display_userhomepage(userid):
                                single="/singlePlayer",
                                lobby="/lobby",
                                join_lobby="/join_lobby",
-                               user_username=user_data["username"],
-                               user_highscore=user_data["highest_point"],
-                               user_aboutme=user_data["about_me"],
-                               user_profile_status=user_data["profile_status"],
-                               user_profile_picture=user_data["profile_picture"]
+                               user_username=user_data.get("username", None),
+                               user_highscore=user_data.get("highest_point", None),
+                               user_aboutme=user_data.get("about_me", None),
+                               user_profile_status=user_data.get("profile_status", None),
+                               user_profile_picture=user_data.get("profile_picture", None)
                                )
     elif result_public["path"] == userid and result_public["profile_status"] == "public":
         # if soemoen is visitng the page and it is public

@@ -21,12 +21,12 @@ class Helper:
         print(input_name + ": "+ str(value), flush=True)
     def generate_path(self):
         timestamp = str(time.time_ns())
-        pool = string.printable
+        pool = string.ascii_letters
         random_characters = ""
         for i in range(25):
             addon = random.choice(pool)
             random_characters = random_characters + addon
-        encoded = base64.b64encode(bytes(random_characters + timestamp, "utf-8")).strip(b"/")
+        encoded = base64.b64encode(bytes(random_characters + timestamp, "utf-8"))
         return encoded
     def new_login(self, database, new_token, username):
         search_user = {"username": username}
