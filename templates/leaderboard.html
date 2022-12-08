@@ -5,15 +5,17 @@
     <title>Leaderboard</title>
     <link rel="stylesheet" href="{{style}}" type="text/css"/>
 </head>
-<body onload="rank();">
+<body>
 
 <h2 class="title">LeaderBoard</h2>
 <table id ="rank">
+    {% for user in user_stat %}
   <tr>
-    <th>{{ Rank }}</th>
-    <th>{{ Name }}</th>
-    <th>{{ Highest_Score }}</th>
+    <th>{{ user["rank"] }}</th>
+    <th>{{ user["name"] }}</th>
+    <th>{{ user["highest_point"] }}</th>
   </tr>
+    {% endfor %}
 </table>
 </body>
 <script src="static/javascript/rank.js"></script>

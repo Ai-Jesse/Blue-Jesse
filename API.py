@@ -53,6 +53,9 @@ class Helper:
         database.update(search_user_stat, replace_token_user, "user_stat")
         return None
 
+    def leadboard_ranking_sort(self, ranking_item):
+        return ranking_item["highest_point"]
+
 # For all the database that will be used in this project we can put htem inside this wrapper
 # so that we can use it to help orgianizing the program
 class MongoDB_wrapper:
@@ -140,6 +143,10 @@ class MongoDB_wrapper:
 
         resutl = self.search(token_search, "user_stat")
         return resutl
+
+    def grab_all_user_stat(self):
+        return self.database["user_stat"].find()
+
 
 # Security check/things goes here
 class Security:

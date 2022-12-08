@@ -207,25 +207,36 @@ def signup_userData():
 
 @app.route("/leaderboard", methods=["GET"])
 def display_leaderBoard():
+    list_user = mongo.grab_all_user_stat()
+    user_ranking_data = []
+    for user in list_user:
+        user_ranking = {}
+        user_ranking["name"] = user["username"]
+        user_ranking["highest_point"] = user["highest_point"]
+        user_ranking_data.append(user_ranking)
+
+    user_ranking_data.sort(reverse=True, key=helper.leadboard_ranking_sort)
+
+    for i in range(len(user_ranking_data)):
+        user_ranking_data[i]["rank"] = i
+
+    helper.Better_Print("user ranking at leaderbord", user_ranking_data)
+    return render_template("leaderboard.html", style="static/styles/leaderboard.css", user_stat=user_ranking_data)
 
 
-
-    return render_template("leaderboard.html", style="static/styles/leaderboard.css")
-
-
-@app.route("/rank", methods=["GET"])
-def ranked_users():
-    rank = [{"username": "a", "highest_point": 123}, {"username": "c", "highest_point": 121},
-            {"username": "b", "highest_point": 122}]
-
-    # scores = mongo.database["user_stat"]
-    # rank = scores.find({},{"authorize_token": 0, "username": 1, "about_me": 0, "profile_picture": 0, "highest_point": 1})
-    def sortkey(score):
-        return score["highest_point"]
-
-    rank = sorted(rank, key=sortkey, reverse=True)
-    return rank
-
+# @app.route("/rank", methods=["GET"])
+# def ranked_users():
+#     rank = [{"username": "a", "highest_point": 123}, {"username": "c", "highest_point": 121},
+#             {"username": "b", "highest_point": 122}]
+#
+#     # scores = mongo.database["user_stat"]
+#     # rank = scores.find({},{"authorize_token": 0, "username": 1, "about_me": 0, "profile_picture": 0, "highest_point": 1})
+#     def sortkey(score):
+#         return score["highest_point"]
+#
+#     rank = sorted(rank, key=sortkey, reverse=True)
+#     return rank
+#
 
 # Not needed
 # @app.route("/changelog", methods=["POST", "GET"])
@@ -401,5 +412,9 @@ def ws_multi_game(ws, path):
     while True:
         data = ws.receive()
         game.handle(data, ws)
-    
+@app.route("/userpage/logout", methods=["POST"])
+def logout():
+    respond =  redirect("/", code=302)
+    respond.delete_cookie("token")
+    return respond
 app.run()  # Don't use this for final product [#Jacky]
