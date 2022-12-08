@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="{{css_file}}" type="text/css"/>
+</head>
+<body>
+{#    <script>#}
+{#        function change_profile() {#}
+{#            //ajax calls for profile#}
+{#            let request = new XMLHttpRequest(); // starting request objects#}
+{#            request.onreadystatechange = () => {#}
+{#                // if the request that we have is good#}
+{#                if (this.readyState === 4 && this.status === 200) {#}
+{#                    console.log("I have the request")#}
+{#                }#}
+{#            }#}
+{#            #}
+{#            request.open("POST", "")#}
+{#        }#}
+{##}
+{#    </script>#}
+
+    <div id = "header">
+        <h1> Welcome, {{user_username}}!</h1>
+    </div>
+    
+    <div class="profile">
+        <div id="profile-pic">
+            <image id="profileImage" src="../static/images/defaultPic.jpeg"></image>
+            <br>
+{#            <input id="imageUpload" type="file" required="" capture hidden/>#}
+{#            <label for ="imageUpload">Edit Profile</label>#}
+            <h3>Current profile status: {{user_profile_status}}</h3>
+            <form action="./change_profile" id="change_profile-form" method="post" enctype="multipart/form-data">
+                <button>Change profile status</button>
+            </form>
+{#             need to think of a way to change between private and public#}
+         </div>
+ 
+        <div id="stats">
+        <table>
+            <tr>
+                <td>Highest Point: {{user_highscore}}</td>
+            </tr>
+        </table>
+            <div>{{user_aboutme}}</div>
+        </div>
+    </div>
+
+<div class="start">
+    <button id="single" onclick=window.location.href="{{single}}">Single Player</button>
+    <button id="lobby" onclick=window.location.href="{{lobby}}">Create Lobby</button>
+    <button id="join_lobby" onclick=window.location.href="{{join_lobby}}">Join Lobby</button>
+    <button id="leaderboard" onclick=window.location.href="{{leaderboard}}">Leaderboard</button>
+</div>
+</body>
+</html>
+
