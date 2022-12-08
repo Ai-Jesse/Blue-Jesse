@@ -131,7 +131,7 @@ def user_login():
         helper.Better_Print("Find Path", path)
         respond = redirect(url_for("display_userhomepage", userid=path))
 
-        respond.set_cookie("token", token, 36000)
+        respond.set_cookie("token", token, 36000, httponly=True)
         return respond
 
 
@@ -210,10 +210,11 @@ def display_leaderBoard():
     list_user = mongo.grab_all_user_stat()
     user_ranking_data = []
     for user in list_user:
-        user_ranking = {}
-        user_ranking["name"] = user["username"]
-        user_ranking["highest_point"] = user["highest_point"]
-        user_ranking_data.append(user_ranking)
+        if user["profile_status"] == "public":
+            user_ranking = {}
+            user_ranking["name"] = user["username"]
+            user_ranking["highest_point"] = user["highest_point"]
+            user_ranking_data.append(user_ranking)
 
     user_ranking_data.sort(reverse=True, key=helper.leadboard_ranking_sort)
 
@@ -390,7 +391,8 @@ def ws_host_room(ws, path):
 
     
     while True:
-        data = ws.receive()
+        data = ws.receive(timeout=1)
+        print("")
         room.handle(data, ws)
 
 @app.route("/multigame/<path>")
