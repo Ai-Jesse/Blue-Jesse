@@ -83,6 +83,13 @@ class MongoDB_wrapper:
         user_data = self.search(search_user_stat, "user_stat")
         return user_data
 
+    def grab_path(self, token):
+        encoded_token = bytes(token, "utf-8")
+
+        search_user_stat = {"authorize_token": hashlib.sha256(encoded_token).hexdigest()}
+
+        path = self.search(search_user_stat, "temp_path")
+        return path.get("path", None)
     def check_if_user_exist(self, token, username=None):
         # if no token
         if token == None:
@@ -125,6 +132,14 @@ class MongoDB_wrapper:
 
         return result
 
+    def check_if_token_exist(self, token):
+        encoded_token = bytes(token, "utf-8")
+
+        hashed_token = hashlib.sha256(encoded_token).hexdigest()
+        token_search = {"authorize_token": hashed_token}
+
+        resutl = self.search(token_search, "user_stat")
+        return resutl
 
 # Security check/things goes here
 class Security:
