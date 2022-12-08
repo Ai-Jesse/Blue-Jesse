@@ -28,6 +28,11 @@
         <div id="profile-pic">
             <image id="profileImage" src="../static/images/defaultPic.jpeg"></image>
             <br>
+
+            <form action="./logout" id="logout-form" method="post" enctype="multipart/form-data">
+                <button>logout</button>
+            </form>
+
 {#            <input id="imageUpload" type="file" required="" capture hidden/>#}
 {#            <label for ="imageUpload">Edit Profile</label>#}
             <h3>Current profile status: {{user_profile_status}}</h3>
