@@ -45,7 +45,7 @@ def homepage():  # view function
 # @app.route("/homepage")  # converts normal function to view function
 # def home():  # view function
 #     print("Someone is at the userpage", flush=True)
-#     return render_template("homepage.html", input="username", input2="static/styles/homepage.css",
+#     return render_template("user_Private_Homepage.html", input="username", input2="static/styles/homepage.css",
 #                            gamesCount="999", bestCount="123", fruitCount="1234", killCount="220",
 #                            leaderboard="/leaderboard",
 #                            single="/singlePlayer", lobby="/lobby")
@@ -123,6 +123,8 @@ def user_login():
             helper.Better_Print("Path is none", path)
             #helper.Better_Print("Path is none user state value", user_data)
             redirect("/404", code=301)
+
+        helper.Better_Print("Find Path", path)
         respond = redirect(url_for("display_userhomepage", userid=path))
 
         respond.set_cookie("token", token, 36000)
@@ -161,7 +163,7 @@ def signup_userData():
     if security.password_and_user_checker(username=username, password=password) or security.duplicate_username(
             username=username, database=mongo):
         # if the input is bad we redirect it to the login page
-        return redirect("/sigup", code=302)  # redirect the user to login page after a bad username and password
+        return redirect("/signup", code=302)  # redirect the user to login page after a bad username and password
     else:
         helper.Better_Print("password", password)
         # Let hash the password
@@ -180,7 +182,7 @@ def signup_userData():
 
         # Set up the database for user
         path = helper.generate_path()
-        temp_path = {"authorize_token": hashed_token, "path": path}
+        temp_path = {"authorize_token": hashed_token, "path": path, "profile_status": "private"}
         mongo.insert(temp_path, "temp_path")
 
         # stored basic user data
@@ -189,7 +191,7 @@ def signup_userData():
 
         # user states
         user_states = {"authorize_token": hashed_token, "username": username, "about_me": None, "profile_picture": None,
-                       "highest_point": None}
+                       "highest_point": None, "profile_status": "private"}
         mongo.insert(user_states, "user_stat")
 
         # print(format) # User name should be max 12 characters
@@ -201,6 +203,9 @@ def signup_userData():
 
 @app.route("/leaderboard", methods=["GET"])
 def display_leaderBoard():
+
+
+
     return render_template("leaderboard.html", style="static/styles/leaderboard.css")
 
 
@@ -236,19 +241,26 @@ def display_userhomepage(userid):
 
     # Checks if the auth token actual matches with the path
     token = request.cookies.get("token", None)
-
+    helper.Better_Print("token at userpage", token)
     if token == None:
         return redirect("/404")
 
 
     # Checks if the author token matches with the path
     result_path = mongo.check_if_path_exist(userid, token) # check if the path exist
+    helper.Better_Print("result path", result_path)
+    # Check if the profile is public
+    result_public = mongo.vist_public_profile(userid, token)
+    helper.Better_Print("result public", result_public)
+
+
 
     if result_path == None:
         return redirect("/404")
-    else:
+    elif result_path != None:
+        # if the user is the owner of the page
         user_data = mongo.grab_user_stat(token)
-        return render_template("homepage.html",
+        return render_template("user_Private_Homepage.html",
                                css_file="../static/styles/homepage.css",
                                leaderboard="/leaderboard",
                                single="/singlePlayer",
@@ -257,8 +269,19 @@ def display_userhomepage(userid):
                                user_username=user_data["username"],
                                user_highscore=user_data["highest_point"],
                                user_aboutme=user_data["about_me"],
+                               user_profile_status=user_data["profile_status"],
                                user_profile_picture=user_data["profile_picture"]
                                )
+    elif result_public["path"] == userid and result_public["profile_status"] == "public":
+        # if soemoen is visitng the page and it is public
+        user_data = mongo.grab_user_stat(result_public["authorize_token"])
+        return render_template("user_Public_Homepage.html",
+                               css_file="../static/styles/homepage.css",
+                               user_username=user_data["username"],
+                               user_highscore=user_data["highest_point"],
+                               user_aboutme=user_data["about_me"],)
+    else:
+        return redirect("/404")
 
 
 app.run()  # Don't use this for final product [#Jacky]

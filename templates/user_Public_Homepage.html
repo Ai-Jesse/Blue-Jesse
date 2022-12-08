@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="{{css_file}}" type="text/css"/>
+</head>
+<body>
+    <div id = "header">
+        <h1> Welcome, To {{user_username}}'s Profile!</h1>
+    </div>
+
+    <div class="profile">
+        <div id="profile-pic">
+            <image id="profileImage" src="../static/images/defaultPic.jpeg" />
+         </div>
+
+        <div id="stats">
+        <table>
+            <tr>
+                <td>Highest Point: {{user_highscore}}</td>
+            </tr>
+        </table>
+            <div>{{user_aboutme}}</div>
+        </div>
+    </div>
+</body>
+</html>
+

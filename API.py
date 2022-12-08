@@ -102,15 +102,29 @@ class MongoDB_wrapper:
         encoded_token = bytes(token, "utf-8")
 
         hashed_token = hashlib.sha256(encoded_token).hexdigest()
+        print("hashed token: "+ str(hashed_token))
         if path == None:
-            return False
-        path_search = {"path": path, "authorize_token": hashed_token}
+            return None
+        # Check if it is the user itself visting than we don't care if the profile is private or not
+        print("my own path type" + str(type(path)))
+        print("my own hash token type" + str(type(hashed_token)))
+        path_encode = bytes(path, "utf-8")
+        path_search = {"authorize_token": hashed_token, "path": path_encode}
         path_database_checker = self.search(path_search, "temp_path")
+        print("path_database_check: " + str(path_database_checker), flush=True)
+        for i in self.database["temp_path"].find():
+            print("temp_path: " + str(i), flush=True)
+            for key in i:
+                print(str(key) + " type " + str(type(key)))
+                print(str(i[key]) + " type " + str(type(i[key])))
+        return path_database_checker
+    def vist_public_profile(self, path, token):
+        # Check if it is a public profile
+        path_public_search = {"path": path, "profile_status": "public"}
+        result = self.search(path_public_search, "temp_path")
 
-        if path_database_checker == None:
-            return False
-        else:
-            return True
+        return result
+
 
 # Security check/things goes here
 class Security:
