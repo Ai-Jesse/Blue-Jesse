@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" href="{{input2}}" type="text/css"/>
+    <link rel="stylesheet" href="{{css_file}}" type="text/css"/>
 </head>
 <body>
     <div id = "header">
-        <h1> Welcome, {{username}}!</h1>
+        <h1> Welcome, {{user_username}}!</h1>
     </div>
     
     <div class="profile">
@@ -19,20 +19,17 @@
         <div id="stats">
         <table>
             <tr>
-                <td>Total Game Play: {{gamesCount}}</td>
-                <td>Longest Record: {{bestCount}}</td>
-            </tr>
-            <tr>
-                <td>Total Fruit Eat: {{fruitCount}}</td>
-                <td>Total Snake Kill: {{killCount}}</td>
+                <td>Highest Point: {{user_highscore}}</td>
             </tr>
         </table>
+            <div>{{user_aboutme}}</div>
         </div>
     </div>
 
 <div class="start">
     <button id="single" onclick=window.location.href="{{single}}">Single Player</button>
     <button id="lobby" onclick=window.location.href="{{lobby}}">Create Lobby</button>
+    <button id="join_lobby" onclick=window.location.href="{{join_lobby}}">Join Lobby</button>
     <button id="leaderboard" onclick=window.location.href="{{leaderboard}}">Leaderboard</button>
 </div>
 </body>

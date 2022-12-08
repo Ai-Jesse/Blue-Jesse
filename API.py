@@ -17,6 +17,8 @@ import bcrypt
 class Helper:
     def __init__(self):
         return
+    def Better_Print(self, input_name:str, value ):
+        print(input_name + ": "+ str(value), flush=True)
     def generate_path(self):
         timestamp = str(time.time_ns())
         pool = string.printable
@@ -73,6 +75,43 @@ class MongoDB_wrapper:
         currentTable.update_one(searchData, update_value)
         return None
 
+
+    def grab_user_stat(self, token):
+        encoded_token = bytes(token, "utf-8")
+
+        search_user_stat = {"authorize_token": hashlib.sha256(encoded_token).hexdigest()}
+        user_data = self.search(search_user_stat, "user_stat")
+        return user_data
+
+    def check_if_user_exist(self, token, username=None):
+        # if no token
+        if token == None:
+            return False
+
+        encoded_token = bytes(token, "utf-8")
+        token_search = {"authorize_token": hashlib.sha256(encoded_token).hexdigest()}
+        token_database_checker = self.search(token_search, "user_authorize_token")
+
+
+        if token_database_checker == None:
+            return False
+        else:
+            return True
+
+    def check_if_path_exist(self, path, token):
+        encoded_token = bytes(token, "utf-8")
+
+        hashed_token = hashlib.sha256(encoded_token).hexdigest()
+        if path == None:
+            return False
+        path_search = {"path": path, "authorize_token": hashed_token}
+        path_database_checker = self.search(path_search, "temp_path")
+
+        if path_database_checker == None:
+            return False
+        else:
+            return True
+
 # Security check/things goes here
 class Security:
     def __init__(self):
@@ -105,15 +144,22 @@ class Security:
     def generate_token(self, username, useragent):
         pool = string.printable
         timestamp = bytes(time.asctime(), "utf-8")
-        random_characters = base64.b64encode(bytes("".join(random.sample(pool, 5)), "utf-8"))
+        random_characters_unencoder = ""
+        for i in range(20):
+            random_characters_unencoder = random_characters_unencoder + random.choice(pool)
+
+        # encoding the ranomd cahracgers
+        random_characters = base64.b64encode(bytes(random_characters_unencoder, "utf-8"))
+
         encoded_username = base64.b64encode(bytes(username, "utf-8"))
-        print(useragent, flush=True)
         encoded_useragent = base64.b64encode(bytes(str(useragent), "utf-8"))
         token = encoded_username + timestamp + random_characters + encoded_useragent
         hash_token = hashlib.sha256(token)
-        return hash_token.hexdigest()
+        return (hash_token.hexdigest(), token)
     def hash_and_salt_password(self, password):
-        hash_salt = bcrypt.hashpw(password, bcrypt.gensalt())
+        encoded_password = bytes(password, "utf-8")
+        hash_salt = bcrypt.hashpw(encoded_password, bcrypt.gensalt())
         return hash_salt
     def check_password(self, password, hashed_password):
-        return bcrypt.checkpw(password, hashed_password)
+        encoded_password = bytes(password, "utf-8")
+        return bcrypt.checkpw(encoded_password, hashed_password)
