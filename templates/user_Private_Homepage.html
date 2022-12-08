@@ -55,7 +55,11 @@
 <div class="start">
     <button id="single" onclick=window.location.href="{{single}}">Single Player</button>
     <button id="lobby" onclick=window.location.href="{{lobby}}">Create Lobby</button>
-    <button id="join_lobby" onclick=window.location.href="{{join_lobby}}">Join Lobby</button>
+    <form action="{{join_lobby}}" id="join_lobby-form" method="post" enctype="multipart/form-data">
+        <label for="room-code">Room Code: </label>
+        <input id="room-code" name="code">
+        <input type="submit" value="Join Lobby">
+    </form>
     <button id="leaderboard" onclick=window.location.href="{{leaderboard}}">Leaderboard</button>
 </div>
 </body>

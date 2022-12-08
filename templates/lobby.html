@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript" charset="utf-8">
+        const code = window.location.href.slice(-4)
+        const socket = new WebSocket('ws://' + window.location.host + '/lobby/' + code);
+        
+        socket.onmessage = function (ws_message) {
+            const message = JSON.parse(ws_message.data);
+            const messageType = message.messageType
+            console.log(ws_message)
+            switch (messageType) {
+                case 'chatMessage':
+                    addMessage(message);
+                    break;
+                case 'start':
+                    startGame()
+                    break
+
+                default:
+                    console.log("received an invalid WS messageType");
+            }
+        }
+        
+        socket.onclose = function () {
+            socket.send(JSON.stringify({'messageType': 'leave'}));
+        }
+
+        function sendMessage() {
+            const chatBox = document.getElementById("chat-comment")
+            const message = chatBox.value;
+            chatBox.value = ""
+            chatBox.focus()
+            if (message !== "") {
+                socket.send(JSON.stringify({'messageType': 'chatMessage', 'message': message}));
+            }
+        }
+
+        function startGame() {
+            const code = document.getElementById("code").innerHTML
+            window.location.href = "/multigame/" + code
+        }
+
+        function getReady() {
+            socket.send(JSON.stringify({"messageType": "start"}))
+        }
+
+        function addMessage(chatMessage) {
+            let chat = document.getElementById('chat');
+            chat.innerHTML += "<b>" + chatMessage['username'] + "</b>: " + chatMessage["message"] + "<br/>";
+        }
+    </script>
+</head>
+<body>
+<div id = "code">{{room_code}}</div>
+
+<label for="chat-comment">Chat: </label>
+<input id="chat-comment" type="text" name="comment">
+<button onclick="sendMessage()">Send</button>
+
+<div id="chat"></div>
+
+<button onclick="getReady()">Ready</button>
+</body>
+</html>
+

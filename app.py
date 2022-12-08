@@ -1,9 +1,12 @@
 # from urllib import request
 import code
 from API import MongoDB_wrapper, Security, Helper
+from game import *
 from flask import Flask, render_template, redirect, request, url_for, session
 from pymongo import MongoClient
 import json
+from flask_sock import Sock
+import threading
 
 # Just added gpg to my second laptop let see if this works[#Jacky]
 
@@ -26,7 +29,7 @@ helper = Helper()
 # Setting up the App
 app = Flask(name)
 print("App running I think")
-
+sock = Sock(app)
 
 @app.route("/")  # converts normal function to view function
 def homepage():  # view function
@@ -278,9 +281,9 @@ def display_userhomepage(userid):
         return render_template("user_Private_Homepage.html",
                                css_file="../static/styles/homepage.css",
                                leaderboard="/leaderboard",
-                               single="/singlePlayer",
-                               lobby="/lobby",
-                               join_lobby="/join_lobby",
+                               single="/singleplayer",
+                               lobby="/lobby/new",
+                               join_lobby="/lobby/join",
                                user_username=user_data.get("username", None),
                                user_highscore=user_data.get("highest_point", None),
                                user_aboutme=user_data.get("about_me", None),
@@ -341,6 +344,74 @@ def change_profile_status():
     respond = redirect(url_for("display_userhomepage", userid=path))
     return respond
 
+@app.route("/singleplayer")
+def singleplayer():
+
+    return render_template("singlegame.html")
+
+#establish singleplayer websocket connection
+@sock.route("/singleplayer") 
+def ws_singleplayer(ws):
+
+    #create a singleplayer game, will keep recieving data and pass it to the game object, handle the code in game class
+    game = SingleGame(ws)
+
+    while True:
+        data = ws.receive()
+        game.handle(data)
+
+@app.route("/lobby/<path>", methods=["GET", "POST"])
+def lobby(path):
+    if path == "new" and request.method == "GET":
+        room = Lobby()
+        code = room.code
+        return redirect("/lobby/" + code, code = 302)
+    elif path == "join" and request.method == "POST":
+        form = request.form
+        code = form.get("code")
+        return redirect("/lobby/" + code, code = 302)
+    else:
+        if Lobby.lobbies.get(path, False):
+            if len(Lobby.lobbies.get(path).socket) < 2:
+                return render_template("lobby.html", room_code=path)
+        return redirect("/userpage", code=302)
+        
+
+@sock.route("/lobby/<path>")
+def ws_host_room(ws, path):
+    room = None
+    for code, socket in Lobby.lobbies.items():
+        if code == path and len(socket.socket) < 2:
+            room = socket
+            room.join(ws)
+            break
+    else:
+        return
+
+    
+    while True:
+        data = ws.receive()
+        room.handle(data, ws)
+
+@app.route("/multigame/<path>")
+def multi_game(path):
+    if MultiGame.games.get(path, False):
+        if len(MultiGame.games[path].player) < 2:
+            return render_template("multigame.html")
+    return redirect("/userpage", code=302)
+
+@sock.route("/multigame/<path>")
+def ws_multi_game(ws, path):
+    game = MultiGame.games.get(path, None)
+
+    if not game:
+        return
+
+    game.join(ws)
+
+    while True:
+        data = ws.receive()
+        game.handle(data, ws)
 @app.route("/userpage/logout", methods=["POST"])
 def logout():
     respond =  redirect("/", code=302)
