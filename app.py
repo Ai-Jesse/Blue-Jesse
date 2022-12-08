@@ -41,7 +41,7 @@ def home():  # view function
     print("Someone is at the userpage", flush=True)
     return render_template("homepage.html", input="username", input2="static/styles/homepage.css",
                            gamesCount="999", bestCount="123", fruitCount="1234", killCount="220", leaderboard="/leaderboard",
-                           single="/singleplayer", newlobby="/newlobby", joinlobby="/joinlobby")
+                           single="/singleplayer", newlobby="/lobby/new", joinlobby="/lobby/join")
 
 
 @app.route("/login", methods=["GET"])  # Only get method
@@ -214,31 +214,27 @@ def ws_singleplayer(ws):
         data = ws.receive()
         game.handle(data)
 
-@app.route("/newlobby")
-def new_lobby():
+@app.route("/lobby/<path>", methods=["GET", "POST"])
+def lobby(path):
+    if path == "new" and request.method == "GET":
+        room = Lobby()
+        code = room.code
+        return redirect("/lobby/" + code, code = 302)
+    elif path == "join" and request.method == "POST":
+        form = request.form
+        code = form.get("code")
+        return redirect("/lobby/" + code, code = 302)
+    else:
+        if Lobby.lobbies.get(path, False):
+            return render_template("lobby.html", room_code=path)
+        return redirect("/homepage", code=302)
+        
 
-    room = Lobby()
-    code = room.code
-
-    return render_template("lobby.html", data=code)
-
-@app.route("/joinlobby", methods=["POST"])
-def join_lobby():
-    form = request.form
-
-    code = form.get("code")
-
-    if Lobby.lobbies.get(code, False):
-        return render_template("lobby.html", data=code)
-
-    return redirect("/homepage", code = 302)
-
-@sock.route("/lobby")
-def ws_host_room(ws):
+@sock.route("/lobby/<path>")
+def ws_host_room(ws, path):
     room = None
-    data = ws.receive()
     for code, socket in Lobby.lobbies.items():
-        if code == data and len(socket.socket) < 2:
+        if code == path and len(socket.socket) < 2:
             room = socket
             room.join(ws)
             break
@@ -250,16 +246,26 @@ def ws_host_room(ws):
         data = ws.receive()
         room.handle(data, ws)
 
-@app.route("/multigame")
-def multi_game():
+@app.route("/multigame/<path>")
+def multi_game(path):
+    if MultiGame.games.get(path, False):
+        return render_template("multigame.html")
+    return redirect("/homepage", code=302)
 
-    return render_template()
+@sock.route("/multigame/<path>")
+def ws_multi_game(ws, path):
+    print(path)
+    game = MultiGame.games.get(path, None)
 
-@sock.route("/multigame")
-def ws_multi_game(ws):
+    if not game:
+        return
 
-    #get the room code of lobby, use socket info to create multiplayer game
-    pass
+    game.join(ws)
+
+    while True:
+        data = ws.receive()
+        game.handle(data, ws)
+        
 
 app.run() # Don't use this for final product [#Jacky]
 
