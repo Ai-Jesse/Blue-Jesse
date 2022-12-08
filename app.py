@@ -270,9 +270,9 @@ def display_userhomepage(userid):
         return render_template("user_Private_Homepage.html",
                                css_file="../static/styles/homepage.css",
                                leaderboard="/leaderboard",
-                               single="/singlePlayer",
-                               lobby="/lobby",
-                               join_lobby="/join_lobby",
+                               single="/singleplayer",
+                               lobby="/lobby/new",
+                               join_lobby="/lobby/join",
                                user_username=user_data.get("username", None),
                                user_highscore=user_data.get("highest_point", None),
                                user_aboutme=user_data.get("about_me", None),
@@ -361,8 +361,9 @@ def lobby(path):
         return redirect("/lobby/" + code, code = 302)
     else:
         if Lobby.lobbies.get(path, False):
-            return render_template("lobby.html", room_code=path)
-        return redirect("/homepage", code=302)
+            if len(Lobby.lobbies.get(path).socket) < 2:
+                return render_template("lobby.html", room_code=path)
+        return redirect("/userpage", code=302)
         
 
 @sock.route("/lobby/<path>")
@@ -384,8 +385,9 @@ def ws_host_room(ws, path):
 @app.route("/multigame/<path>")
 def multi_game(path):
     if MultiGame.games.get(path, False):
-        return render_template("multigame.html")
-    return redirect("/homepage", code=302)
+        if len(MultiGame.games[path].player) < 2:
+            return render_template("multigame.html")
+    return redirect("/userpage", code=302)
 
 @sock.route("/multigame/<path>")
 def ws_multi_game(ws, path):
