@@ -39,8 +39,9 @@ def homepage():  # view function
     if not token_search:
         return render_template("index.html", input="/login", input2="/signup", input4=css_file)
     else:
-        user_stat = mongo.grab_user_stat(token)
-        return render_template(url_for("display_userhomepage", user_data=user_stat))
+        path = mongo.grab_path(token)
+        helper.Better_Print("path at homepage", path)
+        return redirect(url_for("display_userhomepage", userid=path))
 
 # @app.route("/homepage")  # converts normal function to view function
 # def home():  # view function
@@ -259,7 +260,10 @@ def display_userhomepage(userid):
         return redirect("/404")
     elif result_path != None:
         # if the user is the owner of the page
+
+        helper.Better_Print("Owner of the page is here", result_path)
         user_data = mongo.grab_user_stat(token)
+        helper.Better_Print("profile status", user_data.get("profile_status", "does not exist"))
         return render_template("user_Private_Homepage.html",
                                css_file="../static/styles/homepage.css",
                                leaderboard="/leaderboard",
@@ -274,14 +278,55 @@ def display_userhomepage(userid):
                                )
     elif result_public["path"] == userid and result_public["profile_status"] == "public":
         # if soemoen is visitng the page and it is public
+        helper.Better_Print("someone is visting a public page", result_public)
         user_data = mongo.grab_user_stat(result_public["authorize_token"])
         return render_template("user_Public_Homepage.html",
-                               css_file="../static/styles/homepage.css",
+                               css_file="/static/styles/homepage.css",
                                user_username=user_data["username"],
                                user_highscore=user_data["highest_point"],
                                user_aboutme=user_data["about_me"],)
     else:
         return redirect("/404")
 
+# @app.route("userpage/<userid>/<setting>")
+# def display_setting():
+#     return
 
+@app.route("/404")
+def display_error():
+    return render_template("404.html")
+
+@app.route("/userpage")
+def redirect_to_correct():
+    token = request.cookies.get("token", None)
+    token_checker = mongo.check_if_token_exist(token)
+    print("token checker: " + str(token_checker), flush=True)
+    if token_checker == None:
+        return redirect("/")
+    else:
+        path = mongo.grab_path(token)
+        helper.Better_Print("path at userpage/ only", path)
+        return redirect(url_for("display_userhomepage", userid=path))
+@app.route("/userpage/change_profile", methods=["POST"])
+def change_profile_status():
+    token = request.cookies.get("token", None)
+    token_checker = mongo.check_if_token_exist(token)
+    print("token checker: " + str(token_checker), flush=True)
+    if token_checker == None:
+        return redirect("/")
+    else:
+        value = ""
+        actual_value =token_checker.get("profile_status", None)
+        print("actual value: " + str(actual_value), flush=True)
+        if actual_value == "private":
+            value = value + "public"
+        elif actual_value == None:
+            redirect("/", code=302)
+        else:
+            value = value + "private"
+        update_value = {"profile_status": value}
+        mongo.update(token_checker, update_value, "user_stat")
+    path = mongo.grab_path(token)
+    respond = redirect(url_for("display_userhomepage", userid=path))
+    return respond
 app.run()  # Don't use this for final product [#Jacky]

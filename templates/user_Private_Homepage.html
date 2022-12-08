@@ -4,18 +4,37 @@
     <link rel="stylesheet" href="{{css_file}}" type="text/css"/>
 </head>
 <body>
+{#    <script>#}
+{#        function change_profile() {#}
+{#            //ajax calls for profile#}
+{#            let request = new XMLHttpRequest(); // starting request objects#}
+{#            request.onreadystatechange = () => {#}
+{#                // if the request that we have is good#}
+{#                if (this.readyState === 4 && this.status === 200) {#}
+{#                    console.log("I have the request")#}
+{#                }#}
+{#            }#}
+{#            #}
+{#            request.open("POST", "")#}
+{#        }#}
+{##}
+{#    </script>#}
+
     <div id = "header">
         <h1> Welcome, {{user_username}}!</h1>
     </div>
     
     <div class="profile">
         <div id="profile-pic">
-            <image id="profileImage" src="static/images/defaultPic.jpeg" />
+            <image id="profileImage" src="../static/images/defaultPic.jpeg"></image>
             <br>
-            <input id="imageUpload" type="file" required="" capture hidden/>
-            <label for ="imageUpload">Edit Profile</label>
-            <h3>Current profile status: {{profile_status}}</h3>
-            // need to think of a way to change between private and public
+{#            <input id="imageUpload" type="file" required="" capture hidden/>#}
+{#            <label for ="imageUpload">Edit Profile</label>#}
+            <h3>Current profile status: {{user_profile_status}}</h3>
+            <form action="./change_profile" id="change_profile-form" method="post" enctype="multipart/form-data">
+                <button>Change profile status</button>
+            </form>
+{#             need to think of a way to change between private and public#}
          </div>
  
         <div id="stats">
