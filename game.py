@@ -1,12 +1,127 @@
 import random
 import json
+import time
+
+class Snake():
+    def __init__(self, direction, parts):
+        self.change_direction(direction)
+        self.direction = direction
+        self.parts = parts
+
+    def move_snake(self, food):
+        head = {"x": self.parts[0].x + self.dx, "y": self.parts[0].y + self.dy}
+        self.parts.insert(head, 0)
+        if not food.hit_food(head): # check if snake didn't hit food
+            self.parts.pop(-1)
+            return False
+        return True
+
+    def change_direction(self, direction):
+        if direction == "left" and self.direction != "right":
+            self.dx = -10
+            self.dy = 0
+            self.direction = direction
+        elif direction == "up" and self.direction != "down":
+            self.dx = 0
+            self.dy = -10
+            self.direction = direction
+        elif direction == "right" and self.direction != "left":
+            self.dx = 10
+            self.dy = 0
+            self.direction = direction
+        elif direction == "down" and self.direction != "up":
+            self.dx = 0
+            self.dy = 10
+            self.direction = direction
+
+    def hit_self(self, head):
+        for i in range(4, len(self.parts)):
+            if head["x"] == self.parts[i]["x"] and head["y"] == self.parts[i]["y"]:
+                return True
+        return False
+
+def gen_fruit(board, snake):
+    food_x = random.random(board.left_wall, board.right_wall, 10)
+    food_y = random.random(board.top_wall, board.botoom_wall, 10)
+    while True: # make sure food don't spawn on snake
+        for i in snake:
+            if i["x"] == food_x:
+                food_x = random.random(board.left_wall, board.right_wall, 10)
+                break
+            if i["y"] == food_y:
+                food_y = random.random(board.top_wall, board.botoom_wall, 10)
+                break
+        else:
+            break
+
+    fruit = Food(food_x, food_y)
+    return fruit
+
+class Food():
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+    
+    def hit_food(self, head):
+        if head["x"] == self.x and head["y"] == self.y:
+            return True
+        return False
+
+class Board():
+    def __init__(self, width, height):
+        self.left_wall = 0
+        self.right_wall = width
+        self.top_wall = 0
+        self.bottom_wall = height
+
+    def hit_wall(self, head):
+        hit_left = head["x"] < self.left_wall;
+        hit_right = head["x"] > self.right_wall - 10;
+        hit_top = head["y"] < self.right_wall;
+        hit_bottom = head["y"] > self.bottom_wall - 10;
+
+        return hit_left or hit_right or hit_top or hit_bottom
 
 class SingleGame():
     def __init__(self, socket):
         self.socket = socket
+        
+        self.snake = Snake("left", [
+            {"x": 200, "y": 200},
+            {"x": 190, "y": 200}
+        ])
+        self.board = Board(400, 400)
+        self.food = gen_fruit(self.snake)
+        self.point = 0
 
+    def died(self):
+        pass
+
+    def win(self):
+        pass
+
+    def start(self):
+        while not self.ended:
+            time.sleep(.1)
+            if self.snake.move_snake(self.food):
+                self.food = gen_fruit(self.snake.parts)
+                self.point += 10
+            if self.board.hit_wall(self.snake.parts[0]) or self.snake.hit_self(self.snake.parts[0]):
+                self.died()
+
+            data = {
+                "snake": self.snake.parts,
+                "food": {"x": self.food.x, "y": self.food.y},
+                "died": self.died,
+                "win": self.win
+            }
+
+    
     def handle(self, data):
-        self.socket.send(data)
+        data = json.loads(data)
+        
+        direction = data["direction"]
+        self.snake.change_direction(direction)
 
 
 class MultiGame():

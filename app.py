@@ -254,7 +254,6 @@ def multi_game(path):
 
 @sock.route("/multigame/<path>")
 def ws_multi_game(ws, path):
-    print(path)
     game = MultiGame.games.get(path, None)
 
     if not game:
