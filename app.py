@@ -31,15 +31,24 @@ print("App running I think")
 @app.route("/")  # converts normal function to view function
 def homepage():  # view function
     print("Someone is at the homepage", flush=True)
-    return render_template("index.html", input="/login", input2="/signup", input4=css_file)
 
+    token = request.cookies.get("token", None)
+    helper.Better_Print("token", token)
+    token_search = mongo.check_if_user_exist(token)
 
-@app.route("/homepage")  # converts normal function to view function
-def home():  # view function
-    print("Someone is at the userpage", flush=True)
-    return render_template("homepage.html", input="username", input2="static/styles/homepage.css",
-                           gamesCount="999", bestCount="123", fruitCount="1234", killCount="220", leaderboard="/leaderboard",
-                           single="/singlePlayer", lobby="/lobby")
+    if not token_search:
+        return render_template("index.html", input="/login", input2="/signup", input4=css_file)
+    else:
+        user_stat = mongo.grab_user_stat(token)
+        return render_template(url_for("display_userhomepage", user_data=user_stat))
+
+# @app.route("/homepage")  # converts normal function to view function
+# def home():  # view function
+#     print("Someone is at the userpage", flush=True)
+#     return render_template("user_Private_Homepage.html", input="username", input2="static/styles/homepage.css",
+#                            gamesCount="999", bestCount="123", fruitCount="1234", killCount="220",
+#                            leaderboard="/leaderboard",
+#                            single="/singlePlayer", lobby="/lobby")
 
 
 @app.route("/login", methods=["GET"])  # Only get method
@@ -79,8 +88,10 @@ def user_login():
     print(value, flush=True)
     print(searchable_able, flush=True)
 
-    value = security.check_password(password, value.get("password", None))
+    if value == None:
+        return redirect("/login", code=302)
 
+    value = security.check_password(password, value.get("password", None))
 
     if not value:
         # If the user does not exist
@@ -90,18 +101,34 @@ def user_login():
         redirect_respond.set_cookie("login_status", "No such user")
         return redirect_respond
     else:
-    # If the user name is there
-    # redirect datas using cookies
+        # If the user name is there
+        # redirect datas using cookies
         new_token = security.generate_token(username, request.user_agent)
-        helper.new_login(mongo, new_token, username)
-        print("new token: " + str(new_token), flush=True)
-        search_path = {"authorize_token": new_token}
-        for i in mongo.database["temp_path"].find():
-            print("temp_path: ", flush=True)
-            print(i, flush=True)
 
-        path = mongo.search(search_path, "temp_path").get("path")
-        return redirect(url_for("display_userhomepage", path=path))
+        hash_token = new_token[0]
+        token = new_token[1]
+
+        helper.new_login(mongo, hash_token, username) # This update all the old token in database
+        print("new token: " + str(new_token), flush=True)
+        search_path = {"authorize_token": hash_token}
+        # for i in mongo.database["temp_path"].find():
+        #     print("temp_path: ", flush=True)
+        #     print(i, flush=True)
+
+        path = mongo.search(search_path, "temp_path").get("path", None)
+
+        #user_datas = mongo.grab_user_stat(token)
+
+        if path == None:
+            helper.Better_Print("Path is none", path)
+            #helper.Better_Print("Path is none user state value", user_data)
+            redirect("/404", code=301)
+
+        helper.Better_Print("Find Path", path)
+        respond = redirect(url_for("display_userhomepage", userid=path))
+
+        respond.set_cookie("token", token, 36000)
+        return respond
 
 
 # This is signup
@@ -128,37 +155,43 @@ def signup_userData():
 
     # Some how get data from the form 
     # Waiting for frontend
-    username = forumData.get("new-username")
-    password = forumData.get("new-password")
+    username = forumData.get("new-username", None)
+    password = forumData.get("new-password", None)
     # probnley should have a loading screen here maybe
 
     # this is suppose to clean/ check for bad account and password
-    if security.password_and_user_checker(username=username, password=password) or security.duplicate_username(username=username, database=mongo):
+    if security.password_and_user_checker(username=username, password=password) or security.duplicate_username(
+            username=username, database=mongo):
         # if the input is bad we redirect it to the login page
-        return redirect("/sigup", code=302) # redirect the user to login page after a bad username and password
-    else:    
+        return redirect("/signup", code=302)  # redirect the user to login page after a bad username and password
+    else:
+        helper.Better_Print("password", password)
         # Let hash the password
         hashed_password = security.hash_and_salt_password(password)
 
         autho_token = security.generate_token(username, request.user_agent)
+
+
+        hashed_token = autho_token[0]
+        token = autho_token[1]
         # Structure the data input to database
-        user = {"username": username, "password": hashed_password, "old_token": autho_token }
+        # Storing the hash of the token
+        user = {"username": username, "password": hashed_password, "old_token": hashed_token}
         # Insert the hash password
         mongo.insert(user, "user")
 
         # Set up the database for user
         path = helper.generate_path()
-        temp_path = {"authorize_token": autho_token, "path": path}
-        mongo.insert(temp_path,  "temp_path")
-
+        temp_path = {"authorize_token": hashed_token, "path": path, "profile_status": "private"}
+        mongo.insert(temp_path, "temp_path")
 
         # stored basic user data
-        user_authorized_token = {"username": username, "authorize_token": autho_token}
+        user_authorized_token = {"username": username, "authorize_token": hashed_token}
         mongo.insert(user_authorized_token, "user_authorize_token")
 
-
         # user states
-        user_states = {"authorize_token": autho_token, "username": username, "about_me": None, "profile_picture": None, "highest_point": None}
+        user_states = {"authorize_token": hashed_token, "username": username, "about_me": None, "profile_picture": None,
+                       "highest_point": None, "profile_status": "private"}
         mongo.insert(user_states, "user_stat")
 
         # print(format) # User name should be max 12 characters
@@ -167,46 +200,88 @@ def signup_userData():
         # direct the user to the user homepage [#Jacky]
         return redirect("/login", code=302)
 
-@app.route("/leaderboard",methods=["GET"])
-def display_leaderBoard():
-    return render_template("leaderboard.html",style = "static/styles/leaderboard.css")
 
-@app.route("/rank",methods=["GET"])
+@app.route("/leaderboard", methods=["GET"])
+def display_leaderBoard():
+
+
+
+    return render_template("leaderboard.html", style="static/styles/leaderboard.css")
+
+
+@app.route("/rank", methods=["GET"])
 def ranked_users():
-    rank = [{"username":"a","highest_point":123},{"username":"c","highest_point":121},{"username":"b","highest_point":122}]
+    rank = [{"username": "a", "highest_point": 123}, {"username": "c", "highest_point": 121},
+            {"username": "b", "highest_point": 122}]
+
     # scores = mongo.database["user_stat"]
     # rank = scores.find({},{"authorize_token": 0, "username": 1, "about_me": 0, "profile_picture": 0, "highest_point": 1})
     def sortkey(score):
         return score["highest_point"]
 
-    rank = sorted(rank,key=sortkey,reverse=True)
+    rank = sorted(rank, key=sortkey, reverse=True)
     return rank
 
-@app.route("/changelog", methods=["POST", "GET"])
-def display_changelog():
-    change_data = open("changelogs.txt", "r").readlines()
 
-    # Change the change log into three selection so I can display them better
-
-    # This will use the template feature of flask and use that to display a text file that I will write on the side for all the changes I made and the goals this can also be used to test
-    return render_template("changelog.html", change=change_data)
+# Not needed
+# @app.route("/changelog", methods=["POST", "GET"])
+# def display_changelog():
+#     change_data = open("changelogs.txt", "r").readlines()
+#
+#     # Change the change log into three selection so I can display them better
+#
+#     # This will use the template feature of flask and use that to display a text file that I will write on the side for all the changes I made and the goals this can also be used to test
+#     return render_template("changelog.html", change=change_data)
 @app.route("/userpage/<userid>")
 def display_userhomepage(userid):
     # display the userhomepage
     # Using render_template I can use the same html for all user to make them feel special
     # Grab usernameq
     # Change later for the actual html
-    user_info = {"username":"username","gamesCount":999, "bestCount":123, "fruitCount":1234, "killCount":220} # for test
-    user_info = mongo.search({"username":userid},"user_stat")
 
-    return render_template("homepage.html",
-                           input=user_info["username"],
-                           input2="static/styles/homepage.css",
-                           gamesCount=user_info["gamesCount"],
-                           bestCount=user_info["bestCount"],
-                           fruitCount=user_info["fruitCount"],
-                           killCount=user_info["killCount"],
-                           leaderboard="/leaderboard",
-                           single="/singlePlayer", lobby="/lobby")
-app.run() # Don't use this for final product [#Jacky]
-    return render_template("homepage.html", value=path)
+    # Checks if the auth token actual matches with the path
+    token = request.cookies.get("token", None)
+    helper.Better_Print("token at userpage", token)
+    if token == None:
+        return redirect("/404")
+
+
+    # Checks if the author token matches with the path
+    result_path = mongo.check_if_path_exist(userid, token) # check if the path exist
+    helper.Better_Print("result path", result_path)
+    # Check if the profile is public
+    result_public = mongo.vist_public_profile(userid, token)
+    helper.Better_Print("result public", result_public)
+
+
+
+    if result_path == None:
+        return redirect("/404")
+    elif result_path != None:
+        # if the user is the owner of the page
+        user_data = mongo.grab_user_stat(token)
+        return render_template("user_Private_Homepage.html",
+                               css_file="../static/styles/homepage.css",
+                               leaderboard="/leaderboard",
+                               single="/singlePlayer",
+                               lobby="/lobby",
+                               join_lobby="/join_lobby",
+                               user_username=user_data.get("username", None),
+                               user_highscore=user_data.get("highest_point", None),
+                               user_aboutme=user_data.get("about_me", None),
+                               user_profile_status=user_data.get("profile_status", None),
+                               user_profile_picture=user_data.get("profile_picture", None)
+                               )
+    elif result_public["path"] == userid and result_public["profile_status"] == "public":
+        # if soemoen is visitng the page and it is public
+        user_data = mongo.grab_user_stat(result_public["authorize_token"])
+        return render_template("user_Public_Homepage.html",
+                               css_file="../static/styles/homepage.css",
+                               user_username=user_data["username"],
+                               user_highscore=user_data["highest_point"],
+                               user_aboutme=user_data["about_me"],)
+    else:
+        return redirect("/404")
+
+
+app.run()  # Don't use this for final product [#Jacky]
