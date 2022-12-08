@@ -7,8 +7,8 @@ const snake_border = 'darkblue';
 const snakeboard = document.getElementById("snakeboard");
 // Return a two dimensional drawing context
 const snakeboard_ctx = snakeboard.getContext("2d");
-
-const socket = new WebSocket('ws://' + window.location.host + '/singleplayer');
+const code = window.location.href.slice(-4)
+const socket = new WebSocket('ws://' + window.location.host + '/multigame/' + code);
 socket.onmessage = function (ws_message) {
     const data = JSON.parse(ws_message.data);
     draw(data)
@@ -17,7 +17,11 @@ socket.onmessage = function (ws_message) {
 // Draw game
 function draw(data) {
     clearCanvas()
-    drawSnake(data.snake)
+    console.log(data)
+    console.log(data.snake1)
+    console.log(data.snake2)
+    drawSnake(data.snake1)
+    drawSnake(data.snake2)
     drawFood(data.food)
 }
 

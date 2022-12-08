@@ -1,24 +1,16 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <script type="text/javascript" charset="utf-8">
-        const code = window.location.href.slice(-4)
-        const socket = new WebSocket('ws://' + window.location.host + '/multigame/' + code);
-        socket.onmessage = function (ws_message) {
-            console.log(ws_message)
-        }
+  <head>
+  	<title>Snake Game</title>
+    <link href="/static/styles/multiGame.css" rel="stylesheet">
+  </head>
 
-        function test() {
-            socket.send("test")
-        }
-        
-    </script>
-</head>
-<body>
+  <body>
+    <div class="grid">
+        <h3>Score:<div id="points"></div></h3>
+        <canvas id="snakeboard" width="800" height="400"></canvas>
+    </div>
+  </body>
 
-<div class="start">
-    <button id="single" onclick="test()">Test</button>
-</div>
-</body>
+  <script src="/static/javascript/multiGame.js"></script>
 </html>
-

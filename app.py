@@ -6,6 +6,7 @@ from flask import Flask, render_template, redirect, request, url_for, session
 from pymongo import MongoClient
 import json
 from flask_sock import Sock
+import threading
 
 # Just added gpg to my second laptop let see if this works[#Jacky]
 
@@ -210,6 +211,7 @@ def ws_singleplayer(ws):
 
     #create a singleplayer game, will keep recieving data and pass it to the game object, handle the code in game class
     game = SingleGame(ws)
+
     while True:
         data = ws.receive()
         game.handle(data)
