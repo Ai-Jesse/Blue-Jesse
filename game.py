@@ -99,14 +99,15 @@ class Player():
 
 class SingleGame():
     def __init__(self, socket, token):
-        self.socket = socket
+
 
         self.player = Player(
-            Snake("right", [
+            snake=Snake("right", [
                 {"x": 200, "y": 200},
                 {"x": 190, "y": 200}
             ]),
-            token
+            socket=socket,
+            token=token
         )
 
         self.board = Board(400, 400)
@@ -142,7 +143,7 @@ class SingleGame():
             if self.player.died:
                 self.game_over()
 
-            self.socket.send(json.dumps(data))
+            self.player.socket.send(json.dumps(data))
 
     
     def handle(self, data):
@@ -178,13 +179,12 @@ class MultiGame():
         self.board = Board(800, 400)
         self.food = gen_fruit(self.board, self.player1.snake.parts + self.player2.snake.parts)
 
-    def game_over(self, data):
+    def game_over(self):
         if self.player1.socket:
             self.player1.socket.close()
         if self.player2.socket:
             self.player2.socket.close()
         del self.games[self.code]
-        time.sleep(10)
         
 
     def start(self):
@@ -208,24 +208,27 @@ class MultiGame():
                 "point1": self.player1.point,
                 "point2": self.player2.point,
                 "died1": self.player1.died,
-                "died2": self.player2.died
+                "died2": self.player2.died,
+                "username1": self.player1.username,
+                "username2": self.player2.username
             }
 
-            if self.player1.died or self.player2.died:
-                self.game_over(data)
-
-            if self.player1.socket:
+            try:
                 self.player1.socket.send(json.dumps(data))
-            if self.player2.socket:
+            except:
+                self.leave(self.player1.socket)
+            try:
                 self.player2.socket.send(json.dumps(data))
-        
+            except:
+                self.leave(self.player2.socket)
+
+            if self.player1.died or self.player2.died:
+                self.game_over()
 
     def leave(self, socket):
         if self.player1.socket == socket:
-            self.player1.socket = None
             self.player1.died = True
         elif self.player2.socket == socket:
-            self.player2.socket = None
             self.player2.died = True
 
     def join(self, socket, token):
@@ -292,7 +295,7 @@ class Lobby():
                 auth_token = i["token"]
         
         from app import mongo
-        if not helper.check_xsrf_token(xsrf_token, auth_token, mongo, "chat_xsrf"):
+        if not helper.check_xsrf_token(xsrf_token, mongo, "chat_xsrf", auth_token):
             socket.send(json.dumps({"messageType": "leave"}))
             self.leave(socket)
             return

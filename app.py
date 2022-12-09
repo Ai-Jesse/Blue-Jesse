@@ -14,7 +14,7 @@ import threading
 # Web Application name: blue_Jesse
 name = "blue_Jesse"
 # Setting up Database for the project
-client = MongoClient("mongo")[name]
+client = MongoClient("localhost")[name]
 mongo = MongoDB_wrapper(client)
 css_file = "static/styles/index.css"
 
@@ -61,9 +61,10 @@ def loginPage():
     # suggestion will be to use cookie to help checking if the login faill 
     # another option will be me senting post request and make it render a differnt valye in the login box when the loginData fail to get datas
     # [Jacky]
+    xsrf = helper.generate_xsrf_token(mongo, "login_xsrf")
     login_status = request.cookies.get("login_status", "Please Login")
     return render_template("login.html", signup_path="/signup", login_post_path="/loginData",
-                           css_path="static/styles/login.css", display_message=login_status)
+                           css_path="static/styles/login.css", display_message=login_status, xsrf=xsrf)
     # return render_template("login.html", input="/loginData") # Files can be served easier with static files check flask documenation
 
 
@@ -72,6 +73,9 @@ def loginPage():
 @app.route("/loginData", methods=["POST", "GET"])
 def user_login():
     forumData = request.form
+    xsrf = forumData.get("login-xsrf")
+    if not helper.check_xsrf_token(xsrf, mongo, "login_xsrf"):
+        return redirect("/login")
     print(forumData, flush=True)
     username = forumData.get("ret-username", "")
     password = forumData.get("ret-password", "")
@@ -142,8 +146,9 @@ def signup():
     # suggestion will be to use cookie to help checking if the login faill
     # another option will be me senting post request and make it render a differnt valye in the login box when the loginData fail to get datas
     # [Jacky]
+    xsrf = helper.generate_xsrf_token(mongo, "signup_xsrf")
     return render_template("signup.html", signup_post_path="/signupData", login_path="/login",
-                           css_path="static/styles/signup.css")
+                           css_path="static/styles/signup.css", xsrf=xsrf)
     # return render_template("login.html", input="/loginData") # Files can be served easier with static files check flask documenation
 
 
@@ -153,6 +158,9 @@ def signup():
 @app.route("/signupData", methods=["POST"])  # Only post method
 def signup_userData():
     forumData = request.form
+    xsrf = forumData.get("signup-xsrf")
+    if not helper.check_xsrf_token(xsrf, mongo, "signup_xsrf"):
+        return redirect("/signup")
     print("form data", flush=True)
     print(forumData, flush=True)
     # Can we do a preload of html here or we need to do that in the frontend?
@@ -277,6 +285,9 @@ def display_userhomepage(userid):
         return redirect("/404")
     elif result_path != None:
         # if the user is the owner of the page
+        join_lobby_xsrf = helper.generate_xsrf_token(mongo, "game_room_xsrf", token)
+        change_profile_xsrf = helper.generate_xsrf_token(mongo, "change_profile_xsrf", token)
+        logout_xsrf = helper.generate_xsrf_token(mongo, "logout_xsrf", token)
 
         helper.Better_Print("Owner of the page is here", result_path)
         user_data = mongo.grab_user_stat(token)
@@ -291,7 +302,10 @@ def display_userhomepage(userid):
                                user_highscore=user_data.get("highest_point", None),
                                user_aboutme=user_data.get("about_me", None),
                                user_profile_status=user_data.get("profile_status", None),
-                               user_profile_picture=user_data.get("profile_picture", None)
+                               user_profile_picture=user_data.get("profile_picture", None),
+                               join_lobby_xsrf=join_lobby_xsrf,
+                               change_profile_xsrf=change_profile_xsrf,
+                               logout_xsrf=logout_xsrf
                                )
     elif result_public["path"] == userid and result_public["profile_status"] == "public":
         # if soemoen is visitng the page and it is public
@@ -332,6 +346,9 @@ def change_profile_status():
     if token_checker == None:
         return redirect("/")
     else:
+        xsrf = request.form.get("change_profile-xsrf")
+        if not helper.check_xsrf_token(xsrf, mongo, "change_profile_xsrf", token):
+            return redirect("/")
         value = ""
         actual_value =token_checker.get("profile_status", None)
         print("actual value: " + str(actual_value), flush=True)
@@ -366,7 +383,7 @@ def ws_singleplayer(ws):
         return 
 
     #create a singleplayer game, will keep recieving data and pass it to the game object, handle the code in game class
-    game = SingleGame(ws, token)
+    game = SingleGame(ws, token=token)
 
     while True:
         try:
@@ -393,7 +410,8 @@ def lobby(path):
     elif path == "join" and request.method == "POST":
         form = request.form
         code = form.get("code")
-        if code:
+        xsrf_token = form.get("join_lobby-xsrf")
+        if helper.check_xsrf_token(xsrf_token, mongo, "game_room_xsrf", token) and code:
             return redirect("/lobby/" + code, code = 302)
     else:
         if Lobby.lobbies.get(path, False):
@@ -401,7 +419,7 @@ def lobby(path):
                 for i in Lobby.lobbies.get(path, False).socket:
                     if i["token"] == token:
                         return redirect("/userpage", code=302)
-                xsrf_token = helper.generate_xsrf_token(token, mongo, "chat_xsrf")
+                xsrf_token = helper.generate_xsrf_token(mongo, "chat_xsrf", token)
                 return render_template("lobby.html", room_code=path, xsrf_token=xsrf_token, input4="/static/styles/lobby.css")
     return redirect("/userpage", code=302)
         
@@ -471,6 +489,16 @@ def ws_multi_game(ws, path):
 
 @app.route("/userpage/logout", methods=["POST"])
 def logout():
+    token = request.cookies.get("token", None)
+    token_checker = mongo.check_if_token_exist(token)
+    if token_checker == None:
+        return redirect("/userpage")
+
+    xsrf_token = request.form.get("logout-xsrf")
+    if not helper.check_xsrf_token(xsrf_token, mongo, "logout_xsrf", token):
+        return redirect("/userpage")
+    
+
     respond =  redirect("/", code=302)
     respond.delete_cookie("token")
     return respond
