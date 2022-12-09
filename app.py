@@ -401,7 +401,8 @@ def lobby(path):
                 for i in Lobby.lobbies.get(path, False).socket:
                     if i["token"] == token:
                         return redirect("/userpage", code=302)
-                return render_template("lobby.html", room_code=path, input4="/static/styles/lobby.css")
+                xsrf_token = helper.generate_xsrf_token(token, mongo, "chat_xsrf")
+                return render_template("lobby.html", room_code=path, xsrf_token=xsrf_token, input4="/static/styles/lobby.css")
     return redirect("/userpage", code=302)
         
 

@@ -3,6 +3,9 @@ import json
 import time
 import threading
 from API import Security
+from API import Helper
+
+helper = Helper()
 
 class Snake():
     def __init__(self, direction, parts):
@@ -176,6 +179,11 @@ class MultiGame():
         self.food = gen_fruit(self.board, self.player1.snake.parts + self.player2.snake.parts)
 
     def game_over(self, data):
+        if self.player1.socket:
+            self.player1.socket.close()
+        if self.player2.socket:
+            self.player2.socket.close()
+        del self.games[self.code]
         time.sleep(10)
         
 
@@ -206,13 +214,19 @@ class MultiGame():
             if self.player1.died or self.player2.died:
                 self.game_over(data)
 
-            self.player1.socket.send(json.dumps(data))
-            self.player2.socket.send(json.dumps(data))
+            if self.player1.socket:
+                self.player1.socket.send(json.dumps(data))
+            if self.player2.socket:
+                self.player2.socket.send(json.dumps(data))
         
 
     def leave(self, socket):
-        # a player left the game, make the other player win
-        pass
+        if self.player1.socket == socket:
+            self.player1.socket = None
+            self.player1.died = True
+        elif self.player2.socket == socket:
+            self.player2.socket = None
+            self.player2.died = True
 
     def join(self, socket, token):
         from app import mongo
@@ -246,6 +260,7 @@ class Lobby():
 
     def __init__(self):
         self.socket = []
+        self.chat_history = []
         self.code = str(random.randint(1000, 9999)) # generate room code
         while self.code in self.lobbies.keys():
             self.code = str(random.randint(1000, 9999))
@@ -255,6 +270,8 @@ class Lobby():
         from app import mongo
         username = mongo.grab_user_stat(token).get("username")
         self.socket.append({"socket": socket, "username": "temp", "ready": False, "username": username, "token": token}) # join a player to room
+        for i in self.chat_history:
+            socket.send(i)
 
     def leave(self, socket):
         for i in range(len(self.socket)): # find the correct player to remove
@@ -265,13 +282,27 @@ class Lobby():
             del self
 
     def send_chat(self, data, socket):
+        xsrf_token = data["xsrf_token"]
+        s = Security()
         message = data["message"]
+        auth_token = None
         for i in self.socket:
             if i["socket"] == socket:
                 username = i["username"]
+                auth_token = i["token"]
+        
+        from app import mongo
+        if not helper.check_xsrf_token(xsrf_token, auth_token, mongo, "chat_xsrf"):
+            socket.send(json.dumps({"messageType": "leave"}))
+            self.leave(socket)
+            return
+        
+        escaped_message = s.escapeHTML(message)
+        escaped_username = s.escapeHTML(username)
 
-        to_send = {"messageType": "chatMessage", "message": s.escapeHTML(s,message), "username": s.escapeHTML(s,username)} # create message
+        to_send = {"messageType": "chatMessage", "message": escaped_message, "username": escaped_username} # create message
         to_send = json.dumps(to_send)
+        self.chat_history.append(to_send)
         for i in self.socket: # send too all player
             i["socket"].send(to_send)
     
@@ -285,7 +316,7 @@ class Lobby():
                 code = str(random.randint(1000, 9999))
             multi_game = MultiGame(code)
             
-            to_send = {"messageType": "start"}
+            to_send = {"messageType": "start", "code": code}
             to_send = json.dumps(to_send)
             for i in self.socket:
                 i["socket"].send(to_send)

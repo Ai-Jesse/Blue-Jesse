@@ -15,16 +15,17 @@
                     addMessage(message);
                     break;
                 case 'start':
-                    startGame()
+                    startGame(message)
                     break
-
+                case 'leave':
+                    leave()
                 default:
                     console.log("received an invalid WS messageType");
             }
         }
         
-        socket.onclose = function () {
-            socket.send(JSON.stringify({'messageType': 'leave'}));
+        function leave() {
+            window.location.href="/userpage"
         }
 
         document.addEventListener("keypress", function (event) {
@@ -36,15 +37,16 @@
         function sendMessage() {
             const chatBox = document.getElementById("chat-comment")
             const message = chatBox.value;
+            const xsrf_token = document.getElementById("xsrf_token").value
             chatBox.value = ""
             chatBox.focus()
             if (message !== "") {
-                socket.send(JSON.stringify({'messageType': 'chatMessage', 'message': message}));
+                socket.send(JSON.stringify({'messageType': 'chatMessage', 'message': message, 'xsrf_token': xsrf_token}));
             }
         }
 
-        function startGame() {
-            const code = document.getElementById("code").innerHTML
+        function startGame(message) {
+            const code = message["code"]
             window.location.href = "/multigame/" + code
         }
 
@@ -60,6 +62,7 @@
 </head>
 <body>
 <div id = "code">{{room_code}}</div>
+<input value={{xsrf_token}} id="xsrf_token" hidden>
 <div class="container">
     <div id="popup-tag">
         <div id="chat-room">

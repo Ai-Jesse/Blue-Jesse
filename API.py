@@ -56,17 +56,18 @@ class Helper:
     def leadboard_ranking_sort(self, ranking_item):
         return ranking_item["highest_point"]
 
-    def gernate_xsrf_token(self, database, table):
+    def generate_xsrf_token(self, auth_token, database, table):
         pool = string.ascii_letters
         xsrf_token = ""
         for i in range(25):
             xsrf_token = xsrf_token + random.choice(pool)
-        insert_data = {"xsrf_token": xsrf_token}
+        insert_data = {"xsrf_token": xsrf_token, "authorize_token": auth_token}
         database.insert(insert_data, table)
+        return xsrf_token
 
 
-    def checks_xsrf_token(self, xsrf_token, database, table):
-        search_value = {"xsrf_token": xsrf_token}
+    def check_xsrf_token(self, xsrf_token, auth_token, database, table):
+        search_value = {"xsrf_token": xsrf_token, "authorize_token": auth_token}
 
         result = database.search(search_value, table)
         if result == None:
