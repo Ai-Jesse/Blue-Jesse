@@ -1,9 +1,12 @@
 # from urllib import request
 import code
 from API import MongoDB_wrapper, Security, Helper
+from game import *
 from flask import Flask, render_template, redirect, request, url_for, session
 from pymongo import MongoClient
 import json
+from flask_sock import Sock
+import threading
 
 # Just added gpg to my second laptop let see if this works[#Jacky]
 
@@ -26,20 +29,30 @@ helper = Helper()
 # Setting up the App
 app = Flask(name)
 print("App running I think")
-
+sock = Sock(app)
 
 @app.route("/")  # converts normal function to view function
 def homepage():  # view function
     print("Someone is at the homepage", flush=True)
-    return render_template("index.html", input="/login", input2="/signup", input4=css_file)
 
+    token = request.cookies.get("token", None)
+    helper.Better_Print("token", token)
+    token_search = mongo.check_if_user_exist(token)
 
-@app.route("/homepage")  # converts normal function to view function
-def home():  # view function
-    print("Someone is at the userpage", flush=True)
-    return render_template("homepage.html", input="username", input2="static/styles/homepage.css",
-                           gamesCount="999", bestCount="123", fruitCount="1234", killCount="220", leaderboard="/leaderboard",
-                           single="/singlePlayer", lobby="/lobby")
+    if not token_search:
+        return render_template("index.html", input="/login", input2="/signup", input4=css_file)
+    else:
+        path = mongo.grab_path(token)
+        helper.Better_Print("path at homepage", path)
+        return redirect(url_for("display_userhomepage", userid=path))
+
+# @app.route("/homepage")  # converts normal function to view function
+# def home():  # view function
+#     print("Someone is at the userpage", flush=True)
+#     return render_template("user_Private_Homepage.html", input="username", input2="static/styles/homepage.css",
+#                            gamesCount="999", bestCount="123", fruitCount="1234", killCount="220",
+#                            leaderboard="/leaderboard",
+#                            single="/singlePlayer", lobby="/lobby")
 
 
 @app.route("/login", methods=["GET"])  # Only get method
@@ -71,35 +84,55 @@ def user_login():
     #   2a. If the user exist redirect to /userpage
     #   2b. If the user does not exist redirect back to /login
     # [Jacky]
-    password = security.hash_265(password)
-    searchable_able = {"username": username, "password": password}
+    searchable_able = {"username": username}
     # Search in the user finish 
     value = mongo.search(searchable_able, "user")
     # Check if the user is in database
 
     print(value, flush=True)
     print(searchable_able, flush=True)
+
     if value == None:
+        return redirect("/login", code=302)
+
+    value = security.check_password(password, value.get("password", None))
+
+    if not value:
         # If the user does not exist
         # Let redirect user back to /login page
         # TODO: Write data to session cookie
-
         redirect_respond = redirect("/login", code=302)
         redirect_respond.set_cookie("login_status", "No such user")
         return redirect_respond
     else:
-    # If the user name is there
-    # redirect datas using cookies
+        # If the user name is there
+        # redirect datas using cookies
         new_token = security.generate_token(username, request.user_agent)
-        helper.new_login(mongo, new_token, username)
-        print("new token: " + str(new_token), flush=True)
-        search_path = {"authorize_token": new_token}
-        for i in mongo.database["temp_path"].find():
-            print("temp_path: ", flush=True)
-            print(i, flush=True)
 
-        path = mongo.search(search_path, "temp_path").get("path")
-        return redirect(url_for("display_userhomepage", path=path))
+        hash_token = new_token[0]
+        token = new_token[1]
+
+        helper.new_login(mongo, hash_token, username) # This update all the old token in database
+        print("new token: " + str(new_token), flush=True)
+        search_path = {"authorize_token": hash_token}
+        # for i in mongo.database["temp_path"].find():
+        #     print("temp_path: ", flush=True)
+        #     print(i, flush=True)
+
+        path = mongo.search(search_path, "temp_path").get("path", None)
+
+        #user_datas = mongo.grab_user_stat(token)
+
+        if path == None:
+            helper.Better_Print("Path is none", path)
+            #helper.Better_Print("Path is none user state value", user_data)
+            redirect("/404", code=301)
+
+        helper.Better_Print("Find Path", path)
+        respond = redirect(url_for("display_userhomepage", userid=path))
+
+        respond.set_cookie("token", token, 36000, httponly=True)
+        return respond
 
 
 # This is signup
@@ -126,37 +159,43 @@ def signup_userData():
 
     # Some how get data from the form 
     # Waiting for frontend
-    username = forumData.get("new-username")
-    password = forumData.get("new-password")
+    username = forumData.get("new-username", None)
+    password = forumData.get("new-password", None)
     # probnley should have a loading screen here maybe
 
     # this is suppose to clean/ check for bad account and password
-    if security.password_and_user_checker(username=username, password=password) or security.duplicate_username(username=username, database=mongo):
+    if security.password_and_user_checker(username=username, password=password) or security.duplicate_username(
+            username=username, database=mongo):
         # if the input is bad we redirect it to the login page
-        return redirect("/sigup", code=302) # redirect the user to login page after a bad username and password
-    else:    
+        return redirect("/signup", code=302)  # redirect the user to login page after a bad username and password
+    else:
+        helper.Better_Print("password", password)
         # Let hash the password
-        hashed_password = security.hash_265(password)
+        hashed_password = security.hash_and_salt_password(password)
 
         autho_token = security.generate_token(username, request.user_agent)
+
+
+        hashed_token = autho_token[0]
+        token = autho_token[1]
         # Structure the data input to database
-        user = {"username": username, "password": hashed_password, "old_token": autho_token }
+        # Storing the hash of the token
+        user = {"username": username, "password": hashed_password, "old_token": hashed_token}
         # Insert the hash password
         mongo.insert(user, "user")
 
         # Set up the database for user
         path = helper.generate_path()
-        temp_path = {"authorize_token": autho_token, "path": path}
-        mongo.insert(temp_path,  "temp_path")
-
+        temp_path = {"authorize_token": hashed_token, "path": path, "profile_status": "private"}
+        mongo.insert(temp_path, "temp_path")
 
         # stored basic user data
-        user_authorized_token = {"username": username, "authorize_token": autho_token}
+        user_authorized_token = {"username": username, "authorize_token": hashed_token}
         mongo.insert(user_authorized_token, "user_authorize_token")
 
-
         # user states
-        user_states = {"authorize_token": autho_token, "username": username, "about_me": None, "profile_picture": None, "highest_point": None}
+        user_states = {"authorize_token": hashed_token, "username": username, "about_me": None, "profile_picture": None,
+                       "highest_point": None, "profile_status": "private"}
         mongo.insert(user_states, "user_stat")
 
         # print(format) # User name should be max 12 characters
@@ -165,36 +204,222 @@ def signup_userData():
         # direct the user to the user homepage [#Jacky]
         return redirect("/login", code=302)
 
-@app.route("/leaderboard",methods=["GET"])
+
+@app.route("/leaderboard", methods=["GET"])
 def display_leaderBoard():
-    return render_template("leaderboard.html")
+    list_user = mongo.grab_all_user_stat()
+    user_ranking_data = []
+    for user in list_user:
+        if user["profile_status"] == "public":
+            user_ranking = {}
+            user_ranking["name"] = user["username"]
+            user_ranking["highest_point"] = user["highest_point"]
+            user_ranking_data.append(user_ranking)
 
-@app.route("/rank",methods=["GET"])
-def ranked_users():
-    # rank = [{"username":"a","highest_point":123},{"username":"c","highest_point":121},{"username":"b","highest_point":122}]
-    scores = mongo.database["user_stat"]
-    rank = scores.find({},{"authorize_token": 0, "username": 1, "about_me": 0, "profile_picture": 0, "highest_point": 1})
-    def sortkey(score):
-        return score["highest_point"]
+    user_ranking_data.sort(reverse=True, key=helper.leadboard_ranking_sort)
 
-    rank = sorted(rank,key=sortkey,reverse=True)
-    return rank
+    for i in range(len(user_ranking_data)):
+        user_ranking_data[i]["rank"] = i
 
-@app.route("/changelog", methods=["POST", "GET"])
-def display_changelog():
-    change_data = open("changelogs.txt", "r").readlines()
+    helper.Better_Print("user ranking at leaderbord", user_ranking_data)
+    return render_template("leaderboard.html", style="static/styles/leaderboard.css", user_stat=user_ranking_data)
 
-    # Change the change log into three selection so I can display them better
 
-    # This will use the template feature of flask and use that to display a text file that I will write on the side for all the changes I made and the goals this can also be used to test
-    return render_template("changelog.html", change=change_data)
-@app.route("/userpage/<path>")
-def display_userhomepage(path):
+# @app.route("/rank", methods=["GET"])
+# def ranked_users():
+#     rank = [{"username": "a", "highest_point": 123}, {"username": "c", "highest_point": 121},
+#             {"username": "b", "highest_point": 122}]
+#
+#     # scores = mongo.database["user_stat"]
+#     # rank = scores.find({},{"authorize_token": 0, "username": 1, "about_me": 0, "profile_picture": 0, "highest_point": 1})
+#     def sortkey(score):
+#         return score["highest_point"]
+#
+#     rank = sorted(rank, key=sortkey, reverse=True)
+#     return rank
+#
+
+# Not needed
+# @app.route("/changelog", methods=["POST", "GET"])
+# def display_changelog():
+#     change_data = open("changelogs.txt", "r").readlines()
+#
+#     # Change the change log into three selection so I can display them better
+#
+#     # This will use the template feature of flask and use that to display a text file that I will write on the side for all the changes I made and the goals this can also be used to test
+#     return render_template("changelog.html", change=change_data)
+@app.route("/userpage/<userid>")
+def display_userhomepage(userid):
     # display the userhomepage
     # Using render_template I can use the same html for all user to make them feel special
-    # Grab username
+    # Grab usernameq
     # Change later for the actual html
 
-    return render_template("QuickTest.html", value=path)
-app.run() # Don't use this for final product [#Jacky]
+    # Checks if the auth token actual matches with the path
+    token = request.cookies.get("token", None)
+    helper.Better_Print("token at userpage", token)
+    if token == None:
+        return redirect("/404")
 
+
+    # Checks if the author token matches with the path
+    result_path = mongo.check_if_path_exist(userid, token) # check if the path exist
+    helper.Better_Print("result path", result_path)
+    # Check if the profile is public
+    result_public = mongo.vist_public_profile(userid, token)
+    helper.Better_Print("result public", result_public)
+
+
+
+    if result_path == None:
+        return redirect("/404")
+    elif result_path != None:
+        # if the user is the owner of the page
+
+        helper.Better_Print("Owner of the page is here", result_path)
+        user_data = mongo.grab_user_stat(token)
+        helper.Better_Print("profile status", user_data.get("profile_status", "does not exist"))
+        return render_template("user_Private_Homepage.html",
+                               css_file="../static/styles/homepage.css",
+                               leaderboard="/leaderboard",
+                               single="/singleplayer",
+                               lobby="/lobby/new",
+                               join_lobby="/lobby/join",
+                               user_username=user_data.get("username", None),
+                               user_highscore=user_data.get("highest_point", None),
+                               user_aboutme=user_data.get("about_me", None),
+                               user_profile_status=user_data.get("profile_status", None),
+                               user_profile_picture=user_data.get("profile_picture", None)
+                               )
+    elif result_public["path"] == userid and result_public["profile_status"] == "public":
+        # if soemoen is visitng the page and it is public
+        helper.Better_Print("someone is visting a public page", result_public)
+        user_data = mongo.grab_user_stat(result_public["authorize_token"])
+        return render_template("user_Public_Homepage.html",
+                               css_file="/static/styles/homepage.css",
+                               user_username=user_data["username"],
+                               user_highscore=user_data["highest_point"],
+                               user_aboutme=user_data["about_me"],)
+    else:
+        return redirect("/404")
+
+# @app.route("userpage/<userid>/<setting>")
+# def display_setting():
+#     return
+
+@app.route("/404")
+def display_error():
+    return render_template("404.html")
+
+@app.route("/userpage")
+def redirect_to_correct():
+    token = request.cookies.get("token", None)
+    token_checker = mongo.check_if_token_exist(token)
+    print("token checker: " + str(token_checker), flush=True)
+    if token_checker == None:
+        return redirect("/")
+    else:
+        path = mongo.grab_path(token)
+        helper.Better_Print("path at userpage/ only", path)
+        return redirect(url_for("display_userhomepage", userid=path))
+@app.route("/userpage/change_profile", methods=["POST"])
+def change_profile_status():
+    token = request.cookies.get("token", None)
+    token_checker = mongo.check_if_token_exist(token)
+    print("token checker: " + str(token_checker), flush=True)
+    if token_checker == None:
+        return redirect("/")
+    else:
+        value = ""
+        actual_value =token_checker.get("profile_status", None)
+        print("actual value: " + str(actual_value), flush=True)
+        if actual_value == "private":
+            value = value + "public"
+        elif actual_value == None:
+            redirect("/", code=302)
+        else:
+            value = value + "private"
+        update_value = {"profile_status": value}
+        mongo.update(token_checker, update_value, "user_stat")
+    path = mongo.grab_path(token)
+    respond = redirect(url_for("display_userhomepage", userid=path))
+    return respond
+
+@app.route("/singleplayer")
+def singleplayer():
+
+    return render_template("singlegame.html")
+
+#establish singleplayer websocket connection
+@sock.route("/singleplayer") 
+def ws_singleplayer(ws):
+
+    #create a singleplayer game, will keep recieving data and pass it to the game object, handle the code in game class
+    game = SingleGame(ws)
+
+    while True:
+        data = ws.receive()
+        game.handle(data)
+
+@app.route("/lobby/<path>", methods=["GET", "POST"])
+def lobby(path):
+    if path == "new" and request.method == "GET":
+        room = Lobby()
+        code = room.code
+        return redirect("/lobby/" + code, code = 302)
+    elif path == "join" and request.method == "POST":
+        form = request.form
+        code = form.get("code")
+        return redirect("/lobby/" + code, code = 302)
+    else:
+        if Lobby.lobbies.get(path, False):
+            if len(Lobby.lobbies.get(path).socket) < 2:
+                return render_template("lobby.html", room_code=path, input4="/static/styles/lobby.css")
+        return redirect("/userpage", code=302)
+        
+
+@sock.route("/lobby/<path>")
+def ws_host_room(ws, path):
+    room = None
+    for code, socket in Lobby.lobbies.items():
+        if code == path and len(socket.socket) < 2:
+            room = socket
+            room.join(ws)
+            break
+    else:
+        return
+
+    
+    while True:
+        try:
+            data = ws.receive()
+        except:
+            room.leave(ws)
+        print(Lobby.lobbies)
+        room.handle(data, ws)
+
+@app.route("/multigame/<path>")
+def multi_game(path):
+    if MultiGame.games.get(path, False):
+        if len(MultiGame.games[path].player) < 2:
+            return render_template("multigame.html")
+    return redirect("/userpage", code=302)
+
+@sock.route("/multigame/<path>")
+def ws_multi_game(ws, path):
+    game = MultiGame.games.get(path, None)
+
+    if not game:
+        return
+
+    game.join(ws)
+
+    while True:
+        data = ws.receive()
+        game.handle(data, ws)
+@app.route("/userpage/logout", methods=["POST"])
+def logout():
+    respond =  redirect("/", code=302)
+    respond.delete_cookie("token")
+    return respond
+app.run()  # Don't use this for final product [#Jacky]
