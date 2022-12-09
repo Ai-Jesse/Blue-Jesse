@@ -2,7 +2,7 @@
 import code
 from API import MongoDB_wrapper, Security, Helper
 from game import *
-from flask import Flask, render_template, redirect, request, url_for, session
+from flask import Flask, render_template, redirect, request, url_for, session, make_response
 from pymongo import MongoClient
 import json
 from flask_sock import Sock
@@ -14,7 +14,7 @@ import threading
 # Web Application name: blue_Jesse
 name = "blue_Jesse"
 # Setting up Database for the project
-client = MongoClient("mongo")[name]
+client = MongoClient("localhost")[name]
 mongo = MongoDB_wrapper(client)
 css_file = "static/styles/index.css"
 
@@ -30,6 +30,11 @@ helper = Helper()
 app = Flask(name)
 print("App running I think")
 sock = Sock(app)
+
+@app.after_request # add nosniff to all response
+def add_nosniff(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    return response
 
 @app.route("/")  # converts normal function to view function
 def homepage():  # view function
@@ -346,9 +351,10 @@ def change_profile_status():
     if token_checker == None:
         return redirect("/")
     else:
-        xsrf = request.form.get("change_profile-xsrf")
-        if not helper.check_xsrf_token(xsrf, mongo, "change_profile_xsrf", token):
-            return redirect("/")
+        # xsrf = request.form.get("change_profile-xsrf")
+        # if not helper.check_xsrf_token(xsrf, mongo, "change_profile_xsrf", token):
+        #     return redirect("/")
+
         value = ""
         actual_value =token_checker.get("profile_status", None)
         print("actual value: " + str(actual_value), flush=True)

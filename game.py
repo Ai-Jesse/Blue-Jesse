@@ -192,10 +192,10 @@ class MultiGame():
             time.sleep(.1)
             if self.player1.snake.move_snake(self.food):
                 self.food = gen_fruit(self.board, self.player1.snake.parts + self.player2.snake.parts)
-                self.point1 += 10
-            if self.player2.snake.move_snake(self.food):
-                self.food = gen_fruit(self.board, self.player1.snake.parts + self.player2.snake.parts)
-                self.point2 += 10
+                self.player1.point += 10
+            # if self.player2.snake.move_snake(self.food):
+            #     self.food = gen_fruit(self.board, self.player1.snake.parts + self.player2.snake.parts)
+            #     self.player2 += 10
             if self.board.hit_wall(self.player1.snake.parts[0]) or self.player1.snake.hit_self(self.player1.snake.parts[0]) or self.player2.snake.hit_self(self.player1.snake.parts[0], 0):
                 self.player1.died = True
             if self.board.hit_wall(self.player2.snake.parts[0]) or self.player1.snake.hit_self(self.player2.snake.parts[0], 0) or self.player2.snake.hit_self(self.player2.snake.parts[0]):
