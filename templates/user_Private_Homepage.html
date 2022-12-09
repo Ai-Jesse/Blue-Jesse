@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="{{css_file}}" type="text/css"/>
+</head>
+<body>
+    <div id = "header">
+        <h1> Welcome, {{user_username}}!</h1>
+    </div>
+
+    <div class="profile">
+        <div id="profile-pic">
+            <image id="profileImage" src="../static/images/defaultPic.jpeg"></image>
+            <br>
+
+            <form action="./logout" id="logout-form" method="post" enctype="multipart/form-data">
+                <input name="logout-xsrf" value="{{xsrf}}" hidden>
+                <button>logout</button>
+            </form>
+
+{#            <input id="imageUpload" type="file" required="" capture hidden/>#}
+{#            <label for ="imageUpload">Edit Profile</label>#}
+            <h3>Current profile status: {{user_profile_status}}</h3>
+            <form action="./change_profile" id="change_profile-form" method="post" enctype="multipart/form-data">
+                <input name="change_profile-xsrf" value="{{xsrf}}" hidden>
+                <button>Change profile status</button>
+            </form>
+{#             need to think of a way to change between private and public#}
+         </div>
+
+        <div id="stats">
+        <table>
+            <tr>
+                <td>Best Score: {{user_highscore}}</td>
+            </tr>
+        </table>
+            <div>{{user_aboutme}}</div>
+        </div>
+    </div>
+
+<div class="start">
+    <button id="single" onclick=window.location.href="{{single}}">Single Player</button>
+    <button id="lobby" onclick=window.location.href="{{lobby}}">Create Lobby</button>
+    <form action="{{join_lobby}}" id="join_lobby-form" method="post" enctype="multipart/form-data">
+        <input name="join_lobby-xsrf" value="{{xsrf}}" hidden>
+        <label for="room-code">Room Code: </label>
+        <input id="room-code" name="code">
+        <input type="submit" value="Join Lobby">
+    </form>
+    <button id="leaderboard" onclick=window.location.href="{{leaderboard}}">Leaderboard</button>
+</div>
+</body>
+</html>
+
