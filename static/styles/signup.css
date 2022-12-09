@@ -50,15 +50,32 @@ body{
       }
 
       #signup-button{
-        width: 50px;
-        padding: 15px 30px;
-        padding-right: 70px;
-        font-family: sans-serif;
+        background-color:#D3D3D3;
+        border: none;
+        color: black;
+        padding: 15px 32px;
+        margin-left: 20px;
+        margin-top: 80px;
+        margin-right: 50px;
         text-align: center;
-        background-color: #D3D3D3;
-        margin-top: 25px;
-        font-size: 16px;
-      }
+        display: inline-block;
+        font-size: 20px;
+        position: relative;
+        border-radius: 0.3em;
+    }
+    #login{
+        background-color:#D3D3D3;
+        border: none;
+        color: black;
+        padding: 15px 32px;
+        margin-left: 20px;
+        margin-right: 50px;
+        text-align: center;
+        display: inline-block;
+        font-size: 20px;
+        position: relative;
+        border-radius: 0.3em;
+    }
 
       label{
         /* margin-top: 20px; */
@@ -85,20 +102,6 @@ body{
         margin-right: 25px;
       }
 
-    button{
-        background-color:#D3D3D3; 
-        border: none;
-        color: black;
-        padding: 15px 32px;
-        margin-left: 20px;
-        margin-right: 20px;
-        text-align: center;
-        display: inline-block;
-        font-size: 16px;
-        position: relative;
-        /* top: 50px; */
-        /* left: 40%; */
 
-    }
 
     

@@ -220,3 +220,9 @@ class Security:
     def check_password(self, password, hashed_password):
         encoded_password = bytes(password, "utf-8")
         return bcrypt.checkpw(encoded_password, hashed_password)
+
+    def escapeHTML(self,content):
+        content = content.replace("&", "&amp")
+        content = content.replace("<", "&lt")
+        content = content.replace(">", "&gt")
+        return content
