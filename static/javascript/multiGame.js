@@ -88,7 +88,7 @@ function drawSnakePart(snakePart) {
 }
 
 function drawFood(food) {
-    snakeboard_ctx.fillStyle = 'lightgreen';
+    snakeboard_ctx.fillStyle = 'red';
     snakeboard_ctx.strokestyle = 'darkgreen';
     snakeboard_ctx.fillRect(food.x, food.y, 10, 10);
     snakeboard_ctx.strokeRect(food.x, food.y, 10, 10);
