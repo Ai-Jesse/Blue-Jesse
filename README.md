@@ -6,6 +6,13 @@
 #### please do docker compose build and up within the project driecotry after cloning it and you should be avaible to see the app running on port 8080 of localhost
 
 
+# url
+http://www.bluejesse.com
+
+
+
+
+
 
 # Note for backend people
 1. all value that is not set correctly or not grab correctly will be None
