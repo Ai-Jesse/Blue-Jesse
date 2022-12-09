@@ -12,15 +12,18 @@ body{
 }
 
 #ready{
-    background-color:#D3D3DE;
+    background-color:#D3D3D3;
     border: none;
     color: black;
     padding: 15px 32px;
+    margin-left: 210px;
+    margin-top: 150px;
+    margin-right: 50px;
+    text-align: center;
+    display: inline-block;
     font-size: 16px;
     position: relative;
-    margin-top: 150px;
-    margin-left:210px;
-    /* margin-left:500px; */
+    border-radius: 0.3em;
 }
 
 #chat{
@@ -42,7 +45,7 @@ body{
  }
 
 #chat-comment{
-    width:300px;
+    width:362px;
     padding: 10px 5px;
 }
 
@@ -56,12 +59,16 @@ body{
 }
 
 #popup{
-    background-color:#D3D3DE;
+    background-color:#D3D3D3;
     border: none;
     color: black;
     padding: 15px 32px;
-    font-size: 16px;
     margin-top: 400px;
+    text-align: center;
+    display: inline-block;
+    font-size: 16px;
+    position: relative;
+    border-radius: 0.3em;
 }
 
 #chat-room{
