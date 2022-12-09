@@ -1,3 +1,3 @@
 FROM nginx
 
-COPY ./default.conf /ect/nginx/default.conf
+COPY ./default.conf /ect/nginx/conf.d/default.conf
