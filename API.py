@@ -82,7 +82,6 @@ class MongoDB_wrapper:
     def __init__(self, mongoDB):
         self.database = mongoDB
         return
-
     def insert(self, InputData, tableName):
         currentTable = self.database[tableName]
         currentTable.insert_one(InputData)
