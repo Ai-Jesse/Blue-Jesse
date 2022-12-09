@@ -347,6 +347,10 @@ def change_profile_status():
 
 @app.route("/singleplayer")
 def singleplayer():
+    token = request.cookies.get("token", None)
+    token_checker = mongo.check_if_token_exist(token)
+    if token_checker == None:
+        return redirect("/userpage")
 
     return render_template("singlegame.html")
 
@@ -354,15 +358,32 @@ def singleplayer():
 @sock.route("/singleplayer") 
 def ws_singleplayer(ws):
 
+    token = request.cookies.get("token", None)
+    token_checker = mongo.check_if_token_exist(token)
+    if token_checker == None:
+        return 
+
     #create a singleplayer game, will keep recieving data and pass it to the game object, handle the code in game class
-    game = SingleGame(ws)
+    game = SingleGame(ws, token)
 
     while True:
-        data = ws.receive()
-        game.handle(data)
+        try:
+            data = ws.receive()
+            game.handle(data)
+        except:
+            del game
+            break
 
 @app.route("/lobby/<path>", methods=["GET", "POST"])
 def lobby(path):
+    token = request.cookies.get("token", None)
+    token_checker = mongo.check_if_token_exist(token)
+    if token_checker == None:
+        return redirect("/userpage")
+
+    if not path:
+        return redirect("/userpage")
+
     if path == "new" and request.method == "GET":
         room = Lobby()
         code = room.code
@@ -370,53 +391,81 @@ def lobby(path):
     elif path == "join" and request.method == "POST":
         form = request.form
         code = form.get("code")
-        return redirect("/lobby/" + code, code = 302)
+        if code:
+            return redirect("/lobby/" + code, code = 302)
     else:
         if Lobby.lobbies.get(path, False):
             if len(Lobby.lobbies.get(path).socket) < 2:
+                for i in Lobby.lobbies.get(path, False).socket:
+                    if i["token"] == token:
+                        return redirect("/userpage", code=302)
                 return render_template("lobby.html", room_code=path, input4="/static/styles/lobby.css")
-        return redirect("/userpage", code=302)
+    return redirect("/userpage", code=302)
         
 
 @sock.route("/lobby/<path>")
 def ws_host_room(ws, path):
-    room = None
-    for code, socket in Lobby.lobbies.items():
-        if code == path and len(socket.socket) < 2:
-            room = socket
-            room.join(ws)
-            break
+    token = request.cookies.get("token", None)
+    token_checker = mongo.check_if_token_exist(token)
+    if token_checker == None:
+        return 
+    
+    room = Lobby.lobbies.get(path, False)
+    
+    if room and len(room.socket) < 2:
+        for i in room.socket:
+            if i["token"] == token:
+                return
     else:
         return
-
+    
+    room.join(ws, token)
     
     while True:
         try:
             data = ws.receive()
+            room.handle(data, ws)
         except:
             room.leave(ws)
-        print(Lobby.lobbies)
-        room.handle(data, ws)
 
 @app.route("/multigame/<path>")
 def multi_game(path):
-    if MultiGame.games.get(path, False):
-        if len(MultiGame.games[path].player) < 2:
-            return render_template("multigame.html")
+    token = request.cookies.get("token", None)
+    token_checker = mongo.check_if_token_exist(token)
+    if token_checker == None:
+        return redirect("/userpage")
+
+    game = MultiGame.games.get(path, False)
+    if game and not MultiGame.games.get(path).game_start:
+        if game.player1.token == token or game.player2.token == token:
+            return redirect("/userpage", code=302)
+        return render_template("multigame.html")
     return redirect("/userpage", code=302)
 
 @sock.route("/multigame/<path>")
 def ws_multi_game(ws, path):
-    game = MultiGame.games.get(path, None)
+    token = request.cookies.get("token", None)
+    token_checker = mongo.check_if_token_exist(token)
+    if token_checker == None:
+        return redirect("/userpage")
 
-    if not game:
+    game = MultiGame.games.get(path, False)
+    
+    if game and not game.game_start:
+        if game.player1.token == token or game.player2.token == token:
+            return
+    else:
         return
-
-    game.join(ws)
+    
+    game.join(ws, token)
 
     while True:
-        data = ws.receive()
-        game.handle(data, ws)
+        try:
+            data = ws.receive()
+            game.handle(data, ws)
+        except:
+            game.leave(ws)
+
 @app.route("/userpage/logout", methods=["POST"])
 def logout():
     respond =  redirect("/", code=302)

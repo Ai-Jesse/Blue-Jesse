@@ -12,6 +12,12 @@ const socket = new WebSocket('ws://' + window.location.host + '/multigame/' + co
 socket.onmessage = function (ws_message) {
     const data = JSON.parse(ws_message.data);
     draw(data)
+    if (data.died1 == true || data.died2 == true) {
+        // show you died
+
+        // delay for 10 second
+        window.location.href = "/userpage"
+    }
 }
 
 // Draw game

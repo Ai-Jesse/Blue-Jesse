@@ -12,6 +12,9 @@ const socket = new WebSocket('ws://' + window.location.host + '/singleplayer');
 socket.onmessage = function (ws_message) {
     const data = JSON.parse(ws_message.data);
     draw(data)
+    if (data.died == true) {
+        window.location.href = "/userpage"
+    }
 }
 
 // Draw game

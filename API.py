@@ -80,9 +80,16 @@ class MongoDB_wrapper:
     def update(self, searchData, InputData, tableName):
         currentTable = self.database[tableName]
         update_value = {"$set": InputData}
+        print("test")
         currentTable.update_one(searchData, update_value)
         return None
 
+    def update_user_point(self, token, point):
+        encoded_token = bytes(token, "utf-8")
+
+        update_value = {"highest_point": point}
+        search_user_stat = {"authorize_token": hashlib.sha256(encoded_token).hexdigest()}
+        self.update(search_user_stat, update_value, "user_stat")
 
     def grab_user_stat(self, token):
         encoded_token = bytes(token, "utf-8")
