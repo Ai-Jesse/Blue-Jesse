@@ -391,8 +391,11 @@ def ws_host_room(ws, path):
 
     
     while True:
-        data = ws.receive(timeout=1)
-        print("")
+        try:
+            data = ws.receive()
+        except:
+            room.leave(ws)
+        print(Lobby.lobbies)
         room.handle(data, ws)
 
 @app.route("/multigame/<path>")
