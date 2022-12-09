@@ -376,7 +376,7 @@ def lobby(path):
     else:
         if Lobby.lobbies.get(path, False):
             if len(Lobby.lobbies.get(path).socket) < 2:
-                return render_template("lobby.html", room_code=path)
+                return render_template("lobby.html", room_code=path, input4="/static/styles/lobby.css")
         return redirect("/userpage", code=302)
         
 
@@ -393,8 +393,11 @@ def ws_host_room(ws, path):
 
     
     while True:
-        data = ws.receive(timeout=1)
-        print("")
+        try:
+            data = ws.receive()
+        except:
+            room.leave(ws)
+        print(Lobby.lobbies)
         room.handle(data, ws)
 
 @app.route("/multigame/<path>")

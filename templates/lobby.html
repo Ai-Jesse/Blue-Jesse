@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="stylesheet" href="{{input4}}" type="text/css"/>
     <script type="text/javascript" charset="utf-8">
         const code = window.location.href.slice(-4)
         const socket = new WebSocket('ws://' + window.location.host + '/lobby/' + code);
@@ -25,6 +26,12 @@
         socket.onclose = function () {
             socket.send(JSON.stringify({'messageType': 'leave'}));
         }
+
+        document.addEventListener("keypress", function (event) {
+            if (event.code === "Enter") {
+                sendMessage();
+            }
+        });
 
         function sendMessage() {
             const chatBox = document.getElementById("chat-comment")
@@ -53,14 +60,20 @@
 </head>
 <body>
 <div id = "code">{{room_code}}</div>
-
-<label for="chat-comment">Chat: </label>
-<input id="chat-comment" type="text" name="comment">
-<button onclick="sendMessage()">Send</button>
-
-<div id="chat"></div>
-
-<button onclick="getReady()">Ready</button>
+<div class="container">
+    <div id="popup-tag">
+        <div id="chat-room">
+            <div id="chat"></div>
+            <!-- <label for="chat-comment">Chat: </label> -->
+            <input id="chat-comment" type="text" name="comment" placeholder="Chat">
+        </div>
+    <button id="popup" onclick="openChat()">Chat</button>
+    </div>
+    <div id="start-game">
+        <button id="ready" onclick="getReady()">Start Game</button>
+    </div>
+</div>
+<script src="/static/javascript/lobby.js"></script>
 </body>
 </html>
 

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="{{input2}}" type="text/css"/>
+</head>
+<body>
+    <div id = "header">
+        <h1> Welcome, {{input}}!</h1>
+    </div>
+    
+    <div class="profile">
+        <div id="profile-pic">
+            <image id="profileImage" src="static/images/defaultPic.jpeg" />
+            <br>
+            <input id="imageUpload" type="file" required="" capture hidden/>
+            <label for ="imageUpload">Edit Profile</label>
+         </div>
+ 
+        <div id="stats">
+        <table>
+            <tr>
+                <td>Total Game Play: {{gamesCount}}</td>
+                <td>Longest Record: {{bestCount}}</td>
+            </tr>
+            <tr>
+                <td>Total Fruit Eat: {{fruitCount}}</td>
+                <td>Total Snake Kill: {{killCount}}</td>
+            </tr>
+        </table>
+        </div>
+    </div>
+
+<div class="start">
+    <button id="single" onclick=window.location.href="{{single}}">Single Player</button>
+    <button id="lobby" onclick=window.location.href="{{newlobby}}">Create Lobby</button>
+    <form action="{{joinlobby}}" id="signup-form" method="post" enctype="multipart/form-data">
+        <label for="room-code">Room Code: </label>
+        <input type="text" id="room-code" name="code"></input>
+        <br/>
+        <input id="enter-button" type="submit" value="Enter">
+    </form>
+    <button id="leaderboard" onclick=window.location.href="{{leaderboard}}">Leaderboard</button>
+</div>
+</body>
+</html>
+

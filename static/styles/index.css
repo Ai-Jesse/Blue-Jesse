@@ -36,20 +36,31 @@ body{
         bottom: 75px;
     }
 
-    button{
-        background-color:#D3D3D3; /* Green */
+    #login{
+        background-color:#D3D3D3;
+        border: none;
+        color: black;
+        padding: 15px 32px;
+        margin-left: 600px;
+        margin-top: 80px;
+        margin-right: 50px;
+        text-align: center;
+        display: inline-block;
+        font-size: 20px;
+        position: relative;
+        border-radius: 0.3em;
+    }
+    #signup{
+        background-color:#D3D3D3;
         border: none;
         color: black;
         padding: 15px 32px;
         margin-left: 20px;
-        margin-right: 20px;
+        margin-top: 80px;
+        margin-right: 50px;
         text-align: center;
-        text-decoration: none;
         display: inline-block;
-        font-size: 16px;
-        animation: none;
+        font-size: 20px;
         position: relative;
-        top: 150px;
-        left: 40%;
-
+        border-radius: 0.3em;
     }
