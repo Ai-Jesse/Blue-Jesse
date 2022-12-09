@@ -12,6 +12,8 @@ const socket = new WebSocket('ws://' + window.location.host + '/multigame/' + co
 socket.onmessage = function (ws_message) {
     const data = JSON.parse(ws_message.data);
     draw(data)
+    // update_score(data.point1, data.point2)
+    gameover(data.died1, data.died2, data.username1, data.username2)
 }
 
 // Draw game
@@ -92,4 +94,28 @@ function drawFood(food) {
     snakeboard_ctx.strokestyle = 'darkgreen';
     snakeboard_ctx.fillRect(food.x, food.y, 10, 10);
     snakeboard_ctx.strokeRect(food.x, food.y, 10, 10);
+}
+
+// function update_score(score1, score2){
+//     document.getElementById("points-1").innerHTML=score1;
+//     document.getElementById("points-2"),innerHTML=score2;
+// }
+
+function gameover(dead1, dead2, username1, username2){
+    console.log("working");
+    if (dead1 && dead2){
+        alert("Both lost the game");
+        window.location.href="/userpage";
+
+    }
+    else if(dead2){
+        alert("Game Over. " + username1 + " wins!");
+        window.location.href="/userpage";
+
+    }
+    else if (dead1) {
+        alert("Game Over. " + username2 + " wins!");
+        window.location.href="/userpage";
+
+    }
 }
