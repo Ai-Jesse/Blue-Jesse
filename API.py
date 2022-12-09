@@ -56,6 +56,11 @@ class Helper:
     def leadboard_ranking_sort(self, ranking_item):
         return ranking_item["highest_point"]
 
+    def gernate_xsrf_token(self, database, table):
+        insert_data = {}
+
+
+
 # For all the database that will be used in this project we can put htem inside this wrapper
 # so that we can use it to help orgianizing the program
 class MongoDB_wrapper:
