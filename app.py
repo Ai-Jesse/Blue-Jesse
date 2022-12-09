@@ -374,7 +374,7 @@ def lobby(path):
     else:
         if Lobby.lobbies.get(path, False):
             if len(Lobby.lobbies.get(path).socket) < 2:
-                return render_template("lobby.html", room_code=path)
+                return render_template("lobby.html", room_code=path, input4="/static/styles/lobby.css")
         return redirect("/userpage", code=302)
         
 
