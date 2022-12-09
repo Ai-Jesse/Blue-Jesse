@@ -56,17 +56,22 @@ class Helper:
     def leadboard_ranking_sort(self, ranking_item):
         return ranking_item["highest_point"]
 
-    def gernate_xsrf_token(self, database, table):
+    def generate_xsrf_token(self, database, table, auth_token=None):
         pool = string.ascii_letters
         xsrf_token = ""
         for i in range(25):
             xsrf_token = xsrf_token + random.choice(pool)
-        insert_data = {"xsrf_token": xsrf_token}
+        insert_data = {"xsrf_token": xsrf_token, "authorize_token": auth_token}
+        if auth_token == None:
+            insert_data = {"xsrf_token": xsrf_token}
         database.insert(insert_data, table)
+        return xsrf_token
 
 
-    def checks_xsrf_token(self, xsrf_token, database, table):
-        search_value = {"xsrf_token": xsrf_token}
+    def check_xsrf_token(self, xsrf_token, database, table, auth_token=None):
+        search_value = {"xsrf_token": xsrf_token, "authorize_token": auth_token}
+        if auth_token == None:
+            search_value = {"xsrf_token": xsrf_token}
 
         result = database.search(search_value, table)
         if result == None:
@@ -82,6 +87,7 @@ class MongoDB_wrapper:
     def __init__(self, mongoDB):
         self.database = mongoDB
         return
+
     def insert(self, InputData, tableName):
         currentTable = self.database[tableName]
         currentTable.insert_one(InputData)
@@ -94,9 +100,16 @@ class MongoDB_wrapper:
     def update(self, searchData, InputData, tableName):
         currentTable = self.database[tableName]
         update_value = {"$set": InputData}
+        print("test")
         currentTable.update_one(searchData, update_value)
         return None
 
+    def update_user_point(self, token, point):
+        encoded_token = bytes(token, "utf-8")
+
+        update_value = {"highest_point": point}
+        search_user_stat = {"authorize_token": hashlib.sha256(encoded_token).hexdigest()}
+        self.update(search_user_stat, update_value, "user_stat")
 
     def grab_user_stat(self, token):
         encoded_token = bytes(token, "utf-8")
@@ -167,7 +180,6 @@ class MongoDB_wrapper:
         return self.database["user_stat"].find()
 
 # Soemone over wriete my code so im commiting again hopefully to overwriete it back
-
 
 # Security check/things goes here
 class Security:

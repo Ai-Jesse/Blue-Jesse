@@ -3,6 +3,9 @@ import json
 import time
 import threading
 from API import Security
+from API import Helper
+
+helper = Helper()
 
 class Snake():
     def __init__(self, direction, parts):
@@ -84,140 +87,175 @@ class Board():
 
         return hit_left or hit_right or hit_top or hit_bottom
 
-class SingleGame():
-    def __init__(self, socket):
-        self.socket = socket
-        
-        self.snake = Snake("right", [
-            {"x": 200, "y": 200},
-            {"x": 190, "y": 200}
-        ])
-        self.board = Board(400, 400)
-        self.food = gen_fruit(self.board, self.snake.parts)
-        self.point = 0
+class Player():
+    def __init__(self, snake, socket=None, token=None, username=None, player_num = 1):
+        self.player_num = player_num
+        self.snake = snake
+        self.username = username
+        self.token = token
         self.died = False
-        self.win = False
+        self.point = 0
+        self.socket = socket
+
+class SingleGame():
+    def __init__(self, socket, token):
+
+
+        self.player = Player(
+            snake=Snake("right", [
+                {"x": 200, "y": 200},
+                {"x": 190, "y": 200}
+            ]),
+            socket=socket,
+            token=token
+        )
+
+        self.board = Board(400, 400)
+        self.food = gen_fruit(self.board, self.player.snake.parts)
 
         thread = threading.Thread(target=self.start)
         thread.start()
 
-    def game_over(self, condition):
-        pass
+    def game_over(self):
+        from app import mongo
+        user_stat = mongo.grab_user_stat(self.player.token)
+
+        prev_point = user_stat.get("highest_point", 0)
+        if not prev_point or self.player.point > prev_point:
+            mongo.update_user_point(self.player.token, self.player.point)
 
     def start(self):
-        while not self.died and not self.win:
+        while not self.player.died:
             time.sleep(.1)
-            if self.snake.move_snake(self.food):
-                self.food = gen_fruit(self.board, self.snake.parts)
-                self.point += 10
-            if self.board.hit_wall(self.snake.parts[0]) or self.snake.hit_self(self.snake.parts[0]):
-                self.game_over("died")
-                self.died = True
+            if self.player.snake.move_snake(self.food):
+                self.food = gen_fruit(self.board, self.player.snake.parts)
+                self.player.point += 10
+            if self.board.hit_wall(self.player.snake.parts[0]) or self.player.snake.hit_self(self.player.snake.parts[0]):
+                self.player.died = True
 
             data = {
-                "snake": self.snake.parts,
+                "snake": self.player.snake.parts,
                 "food": {"x": self.food.x, "y": self.food.y},
-                "died": self.died,
-                "win": self.win
+                "point": self.player.point,
+                "died": self.player.died
             }
 
-            self.socket.send(json.dumps(data))
+            if self.player.died:
+                self.game_over()
+
+            self.player.socket.send(json.dumps(data))
 
     
     def handle(self, data):
         data = json.loads(data)
         
+        time.sleep(.1)
         direction = data["direction"]
-        self.snake.change_direction(direction)
+        self.player.snake.change_direction(direction)
 
 
 class MultiGame():
     games = {}
     def __init__(self, code):
-        self.player = []
+        self.player1 = Player(
+            Snake("right", [
+                {"x": 100, "y": 200},
+                {"x": 90, "y": 200}
+            ]),
+            player_num=1
+        )
+
+        self.player2 = Player(
+            Snake("left", [
+                {"x": 700, "y": 200},
+                {"x": 710, "y": 200}
+            ])  ,
+            player_num=2
+        )
+
         self.code = code
         self.games[code] = self
-
-        self.snake1 = Snake("right", [
-            {"x": 100, "y": 200},
-            {"x": 90, "y": 200}
-        ])
-        self.snake2 = Snake("left", [
-            {"x": 700, "y": 200},
-            {"x": 710, "y": 200}
-        ])
+        self.game_start = False
         self.board = Board(800, 400)
-        combined = []
-        for i in self.snake1.parts:
-            combined.append(i)
-        for i in self.snake2.parts:
-            combined.append(i)
-        self.food = gen_fruit(self.board, combined)
-        self.point1 = 0
-        self.point2 = 0
-        self.died1 = False
-        self.died2 = False
+        self.food = gen_fruit(self.board, self.player1.snake.parts + self.player2.snake.parts)
 
-    def game_over(self, condition):
-        pass
-
-    def start(self):
-        while not self.died1 and not self.died2:
-            time.sleep(.1)
-            combined = []
-            for i in self.snake1.parts:
-                combined.append(i)
-            for i in self.snake2.parts:
-                combined.append(i)
-            if self.snake1.move_snake(self.food):
-                self.food = gen_fruit(self.board, combined)
-                self.point1 += 10
-            if self.snake2.move_snake(self.food):
-                self.food = gen_fruit(self.board, combined)
-                self.point2 += 10
-            if self.board.hit_wall(self.snake1.parts[0]) or self.snake1.hit_self(self.snake1.parts[0]) or self.snake2.hit_self(self.snake1.parts[0], 0):
-                self.game_over("died")
-                self.died1 = True
-            if self.board.hit_wall(self.snake2.parts[0]) or self.snake1.hit_self(self.snake2.parts[0], 0) or self.snake2.hit_self(self.snake2.parts[0]):
-                self.game_over("died")
-                self.died2 = True
-
-            data = {
-                "snake1": self.snake1.parts,
-                "snake2": self.snake2.parts,
-                "food": {"x": self.food.x, "y": self.food.y},
-                "point1": self.point1,
-                "point2": self.point2,
-                "died1": self.died1,
-                "died2": self.died2
-            }
-
-            for i in self.player:
-                i["socket"].send(json.dumps(data))
+    def game_over(self):
+        if self.player1.socket:
+            self.player1.socket.close()
+        if self.player2.socket:
+            self.player2.socket.close()
+        del self.games[self.code]
         
 
-    def leave(self, socket):
-        # a player left the game, make the other player win
-        pass
+    def start(self):
+        while not self.player1.died and not self.player2.died:
+            time.sleep(.1)
+            if self.player1.snake.move_snake(self.food):
+                self.food = gen_fruit(self.board, self.player1.snake.parts + self.player2.snake.parts)
+                self.point1 += 10
+            if self.player2.snake.move_snake(self.food):
+                self.food = gen_fruit(self.board, self.player1.snake.parts + self.player2.snake.parts)
+                self.point2 += 10
+            if self.board.hit_wall(self.player1.snake.parts[0]) or self.player1.snake.hit_self(self.player1.snake.parts[0]) or self.player2.snake.hit_self(self.player1.snake.parts[0], 0):
+                self.player1.died = True
+            if self.board.hit_wall(self.player2.snake.parts[0]) or self.player1.snake.hit_self(self.player2.snake.parts[0], 0) or self.player2.snake.hit_self(self.player2.snake.parts[0]):
+                self.player2.died = True
 
-    def join(self, socket):
-        self.player.append({"socket": socket, "username": "temp", "snake": len(self.player) + 1}) # join a player to game
-        if len(self.player) == 2:
+            data = {
+                "snake1": self.player1.snake.parts,
+                "snake2": self.player2.snake.parts,
+                "food": {"x": self.food.x, "y": self.food.y},
+                "point1": self.player1.point,
+                "point2": self.player2.point,
+                "died1": self.player1.died,
+                "died2": self.player2.died,
+                "username1": self.player1.username,
+                "username2": self.player2.username
+            }
+
+            try:
+                self.player1.socket.send(json.dumps(data))
+            except:
+                self.leave(self.player1.socket)
+            try:
+                self.player2.socket.send(json.dumps(data))
+            except:
+                self.leave(self.player2.socket)
+
+            if self.player1.died or self.player2.died:
+                self.game_over()
+
+    def leave(self, socket):
+        if self.player1.socket == socket:
+            self.player1.died = True
+        elif self.player2.socket == socket:
+            self.player2.died = True
+
+    def join(self, socket, token):
+        from app import mongo
+        username = mongo.grab_user_stat(token).get("username")
+        if not self.player1.socket:
+            self.player1.socket = socket
+            self.player1.token = token
+            self.player1.username = username
+        else:
+            self.player2.socket = socket
+            self.player2.token = token
+            self.player2.username = username
+        
+            self.game_start = True
             thread = threading.Thread(target=self.start)
             thread.start()
 
     def handle(self, data, socket):
         data = json.loads(data)
         direction = data["direction"]
-        player = None
-        for i in self.player:
-            if i["socket"] == socket:
-                player = i["snake"]
-        time.sleep(.05)
-        if player == 1:
-            self.snake1.change_direction(direction)
-        if player == 2:
-            self.snake2.change_direction(direction)
+
+        time.sleep(.1)
+        if self.player1.socket == socket:
+            self.player1.snake.change_direction(direction)
+        if self.player2.socket == socket:
+            self.player2.snake.change_direction(direction)
         
 
 class Lobby():
@@ -225,13 +263,18 @@ class Lobby():
 
     def __init__(self):
         self.socket = []
+        self.chat_history = []
         self.code = str(random.randint(1000, 9999)) # generate room code
         while self.code in self.lobbies.keys():
             self.code = str(random.randint(1000, 9999))
         self.lobbies[self.code] = self # add room code and lobby to dictionary
     
-    def join(self, socket):
-        self.socket.append({"socket": socket, "username": "temp", "ready": False}) # join a player to room
+    def join(self, socket, token):
+        from app import mongo
+        username = mongo.grab_user_stat(token).get("username")
+        self.socket.append({"socket": socket, "username": "temp", "ready": False, "username": username, "token": token}) # join a player to room
+        for i in self.chat_history:
+            socket.send(i)
 
     def leave(self, socket):
         for i in range(len(self.socket)): # find the correct player to remove
@@ -241,13 +284,28 @@ class Lobby():
             del self.lobbies[self.code]
             del self
 
-    def send_chat(self, data):
+    def send_chat(self, data, socket):
+        xsrf_token = data["xsrf_token"]
+        s = Security()
         message = data["message"]
-        username = "temp"
-        s=Security
+        auth_token = None
+        for i in self.socket:
+            if i["socket"] == socket:
+                username = i["username"]
+                auth_token = i["token"]
+        
+        from app import mongo
+        if not helper.check_xsrf_token(xsrf_token, mongo, "chat_xsrf", auth_token):
+            socket.send(json.dumps({"messageType": "leave"}))
+            self.leave(socket)
+            return
+        
+        escaped_message = s.escapeHTML(message)
+        escaped_username = s.escapeHTML(username)
 
-        to_send = {"messageType": "chatMessage", "message": s.escapeHTML(s,message), "username": s.escapeHTML(s,username)} # create message
+        to_send = {"messageType": "chatMessage", "message": escaped_message, "username": escaped_username} # create message
         to_send = json.dumps(to_send)
+        self.chat_history.append(to_send)
         for i in self.socket: # send too all player
             i["socket"].send(to_send)
     
@@ -256,8 +314,12 @@ class Lobby():
             if i["socket"] == socket:
                 i["ready"] = True
         if len(self.socket) == 2 and self.socket[0]["ready"] == True and self.socket[1]["ready"] == True: # start the game if both player are ready
-            multi_game = MultiGame(self.code)
-            to_send = {"messageType": "start"}
+            code = str(random.randint(1000, 9999)) # generate room code
+            while code in MultiGame.games.keys():
+                code = str(random.randint(1000, 9999))
+            multi_game = MultiGame(code)
+            
+            to_send = {"messageType": "start", "code": code}
             to_send = json.dumps(to_send)
             for i in self.socket:
                 i["socket"].send(to_send)
@@ -267,9 +329,7 @@ class Lobby():
         data = json.loads(data)
         type = data["messageType"]
 
-        if type == "leave":
-            self.leave(socket)
         if type == "chatMessage":
-            self.send_chat(data)
+            self.send_chat(data, socket)
         if type == "start":
             self.start_game(socket)
