@@ -55,7 +55,10 @@ body{
     border: none;
     font-size: 14px;
     width: 56px;
-    padding: 10px 5px
+    padding: 10.5px 5px;
+    position: absolute;
+    bottom: 112.5px;
+    left: 327px;
 }
 
 #popup{
