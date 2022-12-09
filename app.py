@@ -14,7 +14,7 @@ import threading
 # Web Application name: blue_Jesse
 name = "blue_Jesse"
 # Setting up Database for the project
-client = MongoClient("localhost")[name]
+client = MongoClient("mongo")[name]
 mongo = MongoDB_wrapper(client)
 css_file = "static/styles/index.css"
 
