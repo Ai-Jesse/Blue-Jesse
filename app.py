@@ -474,4 +474,5 @@ def logout():
     respond =  redirect("/", code=302)
     respond.delete_cookie("token")
     return respond
+
 app.run()  # Don't use this for final product [#Jacky]

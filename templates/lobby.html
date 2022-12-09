@@ -69,11 +69,13 @@
             <div id="chat"></div>
             <!-- <label for="chat-comment">Chat: </label> -->
             <input id="chat-comment" type="text" name="comment" placeholder="Chat">
+            <button id= "send-chat" onclick="sendMessage()">Send</button>
         </div>
     <button id="popup" onclick="openChat()">Chat</button>
     </div>
     <div id="start-game">
         <button id="ready" onclick="getReady()">Start Game</button>
+        <button id="back" onclick=window.location.href="/userpage">Go Back</button>
     </div>
 </div>
 <script src="/static/javascript/lobby.js"></script>

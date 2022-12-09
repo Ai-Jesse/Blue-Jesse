@@ -5,6 +5,7 @@
 </head>
 <body>
     <div id = "header">
+
         <h1 id=> Welcome, {{user_username}}!</h1>
     </div>
 
@@ -28,13 +29,18 @@
 
 {#            <input id="imageUpload" type="file" required="" capture hidden/>#}
 {#            <label for ="imageUpload">Edit Profile</label>#}
+            <h3>Current profile status: {{user_profile_status}}</h3>
+            <form action="./change_profile" id="change_profile-form" method="post" enctype="multipart/form-data">
+                <input name="change_profile-xsrf" value="{{xsrf}}" hidden>
+                <button>Change profile status</button>
+            </form>
 {#             need to think of a way to change between private and public#}
          </div>
 
         <div id="stats">
         <table>
             <tr>
-                <td>Highest Point: {{user_highscore}}</td>
+                <td>Best Score: {{user_highscore}}</td>
             </tr>
         </table>
             <div>{{user_aboutme}}</div>

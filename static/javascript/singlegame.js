@@ -12,9 +12,8 @@ const socket = new WebSocket('ws://' + window.location.host + '/singleplayer');
 socket.onmessage = function (ws_message) {
     const data = JSON.parse(ws_message.data);
     draw(data)
-    if (data.died == true) {
-        window.location.href = "/userpage"
-    }
+    update_score(data.point)
+    gameover(data.died, data.point)
 }
 
 // Draw game
@@ -91,4 +90,16 @@ function drawFood(food) {
     snakeboard_ctx.strokestyle = 'darkgreen';
     snakeboard_ctx.fillRect(food.x, food.y, 10, 10);
     snakeboard_ctx.strokeRect(food.x, food.y, 10, 10);
+}
+
+function update_score(score) {
+    document.getElementById("points").innerHTML=score;
+}
+
+function gameover(dead, point){
+    console.log("working");
+    if (dead){
+        alert("Game Over! Final Score: " + point);
+        window.location.href="/userpage";
+    }
 }

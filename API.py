@@ -83,6 +83,7 @@ class MongoDB_wrapper:
     def __init__(self, mongoDB):
         self.database = mongoDB
         return
+
     def insert(self, InputData, tableName):
         currentTable = self.database[tableName]
         currentTable.insert_one(InputData)
@@ -175,7 +176,6 @@ class MongoDB_wrapper:
         return self.database["user_stat"].find()
 
 # Soemone over wriete my code so im commiting again hopefully to overwriete it back
-
 
 # Security check/things goes here
 class Security:
