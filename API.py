@@ -57,7 +57,22 @@ class Helper:
         return ranking_item["highest_point"]
 
     def gernate_xsrf_token(self, database, table):
-        insert_data = {}
+        pool = string.ascii_letters
+        xsrf_token = ""
+        for i in range(25):
+            xsrf_token = xsrf_token + random.choice(pool)
+        insert_data = {"xsrf_token": xsrf_token}
+        database.insert(insert_data, table)
+
+
+    def checks_xsrf_token(self, xsrf_token, database, table):
+        search_value = {"xsrf_token": xsrf_token}
+
+        result = database.search(search_value, table)
+        if result == None:
+            return False
+        else:
+            return True
 
 
 
@@ -67,7 +82,6 @@ class MongoDB_wrapper:
     def __init__(self, mongoDB):
         self.database = mongoDB
         return
-
     def insert(self, InputData, tableName):
         currentTable = self.database[tableName]
         currentTable.insert_one(InputData)
