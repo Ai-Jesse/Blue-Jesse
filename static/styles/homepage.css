@@ -38,6 +38,7 @@ body{
     margin-left: 15px;
 }
 
+
 td{
     /* padding-left: 20px; */
     padding-right: 40px;
@@ -118,6 +119,7 @@ button.logout{
     border-radius: 0.3em;
 }
 
+
 button.profileStat{
     position: relative;
     padding: 5px 10px;
@@ -130,6 +132,5 @@ button.profileStat{
     right: 0;
     width: 300px;
 }
-
 
 

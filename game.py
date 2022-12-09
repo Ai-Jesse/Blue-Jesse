@@ -118,7 +118,8 @@ class SingleGame():
                 "snake": self.snake.parts,
                 "food": {"x": self.food.x, "y": self.food.y},
                 "died": self.died,
-                "win": self.win
+                "win": self.win,
+                "point": self.point
             }
 
             self.socket.send(json.dumps(data))
