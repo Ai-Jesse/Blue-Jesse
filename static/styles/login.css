@@ -49,17 +49,6 @@ body{
         font-size: 20px;
       }
 
-      #login-button{
-        width: 50px;
-        padding: 15px 40px;
-        padding-right: 70px;
-        font-family: sans-serif;
-        text-align: center;
-        background-color: #D3D3D3;
-        margin-top: 25px;
-        font-size: 16px;
-      }
-
       label{
         /* margin-top: 20px; */
         margin-right:20px;
@@ -85,20 +74,33 @@ body{
         margin-right: 25px;
       }
 
-    button{
-        background-color:#D3D3D3; 
+    #login-button{
+        background-color:#D3D3D3;
         border: none;
         color: black;
         padding: 15px 32px;
         margin-left: 20px;
-        margin-right: 20px;
+        margin-top: 80px;
+        margin-right: 50px;
         text-align: center;
         display: inline-block;
-        font-size: 16px;
+        font-size: 20px;
         position: relative;
-        /* top: 50px; */
-        /* left: 40%; */
+        border-radius: 0.3em;
+    }
 
+    #signup{
+        background-color:#D3D3D3;
+        border: none;
+        color: black;
+        padding: 15px 32px;
+        margin-left: 20px;
+        margin-right: 50px;
+        text-align: center;
+        display: inline-block;
+        font-size: 20px;
+        position: relative;
+        border-radius: 0.3em;
     }
 
     

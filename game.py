@@ -2,6 +2,7 @@ import random
 import json
 import time
 import threading
+from API import Security
 
 class Snake():
     def __init__(self, direction, parts):
@@ -269,7 +270,7 @@ class Lobby():
             if i["socket"] == socket:
                 username = i["username"]
 
-        to_send = {"messageType": "chatMessage", "message": message, "username": username} # create message
+        to_send = {"messageType": "chatMessage", "message": s.escapeHTML(s,message), "username": s.escapeHTML(s,username)} # create message
         to_send = json.dumps(to_send)
         for i in self.socket: # send too all player
             i["socket"].send(to_send)

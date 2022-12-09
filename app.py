@@ -210,6 +210,8 @@ def display_leaderBoard():
     list_user = mongo.grab_all_user_stat()
     user_ranking_data = []
     for user in list_user:
+        # overrivewing some dumb changes
+        # only works with public profiles create 10 user for test
         if user["profile_status"] == "public":
             user_ranking = {}
             user_ranking["name"] = user["username"]
