@@ -39,9 +39,8 @@ body{
       }
 
       #signup-username, #signup-password{
-        width: 50px;
-        padding: 15px 40px;
-        padding-right: 70px;
+        width: 100px;
+        padding: 10px 10px;
         font-family: sans-serif;
         /* text-align: center; */
         background-color: #D3D3D3;
@@ -101,7 +100,4 @@ body{
         margin-left: 25px;
         margin-right: 25px;
       }
-
-
-
     

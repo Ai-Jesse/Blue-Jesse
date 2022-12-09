@@ -372,7 +372,7 @@ def lobby(path):
     elif path == "join" and request.method == "POST":
         form = request.form
         code = form.get("code")
-        return redirect("/lobby/" + code, code = 302)
+        return redirect("/lobby/" + code, code = 302 , input4="/static/styles/lobby.css")
     else:
         if Lobby.lobbies.get(path, False):
             if len(Lobby.lobbies.get(path).socket) < 2:
@@ -424,4 +424,5 @@ def logout():
     respond =  redirect("/", code=302)
     respond.delete_cookie("token")
     return respond
+
 app.run()  # Don't use this for final product [#Jacky]

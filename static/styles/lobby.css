@@ -12,18 +12,30 @@ body{
 }
 
 #ready{
-    background-color:#D3D3D3;
+    background-color:#D3D3DE;
     border: none;
     color: black;
     padding: 15px 32px;
-    margin-left: 210px;
-    margin-top: 150px;
-    margin-right: 50px;
-    text-align: center;
-    display: inline-block;
     font-size: 16px;
     position: relative;
+    margin-top: 150px;
+    margin-left:180px;
     border-radius: 0.3em;
+    /* margin-left:500px; */
+}
+
+#back{
+    background-color:#D3D3DE;
+    border: none;
+    color: black;
+    padding: 15px 32px;
+    font-size: 16px;
+    position: relative;
+    margin-top: 150px;
+    margin-left:30px;
+    border-radius: 0.3em;
+    /* margin-left:500px; */
+
 }
 
 #chat{
