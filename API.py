@@ -163,7 +163,7 @@ class MongoDB_wrapper:
     def vist_public_profile(self, path, token):
         # Check if it is a public profile
         path_public_search = {"path": path, "profile_status": "public"}
-        result = self.search(path_public_search, "temp_path")
+        result = self.search(path_public_search, "user_stat")
 
         return result
 
