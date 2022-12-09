@@ -386,6 +386,10 @@ def ws_singleplayer(ws):
             data = ws.receive()
             game.handle(data)
         except:
+            try:
+                ws.close()
+            except:
+                pass
             del game
             break
 
@@ -446,7 +450,7 @@ def ws_host_room(ws, path):
             try:
                 room.leave(ws)
             except:
-                pass
+                break
 
 @app.route("/multigame/<path>")
 def multi_game(path):
@@ -484,7 +488,10 @@ def ws_multi_game(ws, path):
             data = ws.receive()
             game.handle(data, ws)
         except:
-            game.leave(ws)
+            try:
+                game.leave(ws)
+            except:
+                break
 
 @app.route("/userpage/logout", methods=["POST"])
 def logout():
