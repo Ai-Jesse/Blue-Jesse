@@ -148,17 +148,17 @@ class MongoDB_wrapper:
         if path == None:
             return None
         # Check if it is the user itself visting than we don't care if the profile is private or not
-        print("my own path type" + str(type(path)))
-        print("my own hash token type" + str(type(hashed_token)))
+        # print("my own path type" + str(type(path)))
+        # print("my own hash token type" + str(type(hashed_token)))
         path_encode = bytes(path, "utf-8")
         path_search = {"authorize_token": hashed_token, "path": path_encode}
         path_database_checker = self.search(path_search, "temp_path")
         print("path_database_check: " + str(path_database_checker), flush=True)
-        for i in self.database["temp_path"].find():
-            print("temp_path: " + str(i), flush=True)
-            for key in i:
-                print(str(key) + " type " + str(type(key)))
-                print(str(i[key]) + " type " + str(type(i[key])))
+        # for i in self.database["temp_path"].find():
+        #     print("temp_path: " + str(i), flush=True)
+        #     for key in i:
+        #         print(str(key) + " type " + str(type(key)))
+        #         print(str(i[key]) + " type " + str(type(i[key])))
         return path_database_checker
     def vist_public_profile(self, path, token):
         # Check if it is a public profile
@@ -176,9 +176,11 @@ class MongoDB_wrapper:
         resutl = self.search(token_search, "user_stat")
         return resutl
 
-    def grab_all_user_stat(self):
-        return self.database["user_stat"].find()
-
+    def grab_all_user_stat(self, query=None):
+        if query == None:
+            return self.database["user_stat"].find()
+        else:
+            return self.database["user_stat"].find(query)
 # Soemone over wriete my code so im commiting again hopefully to overwriete it backq
 
 # Security check/things goes here
