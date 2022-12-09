@@ -220,21 +220,21 @@ def signup_userData():
 
 @app.route("/leaderboard", methods=["GET"])
 def display_leaderBoard():
-    list_user = mongo.grab_all_user_stat()
+    query_dict = {"profile_status": "public"}
+    list_user = mongo.grab_all_user_stat(query_dict)
     user_ranking_data = []
     for user in list_user:
         # overrivewing some dumb changes
         # only works with public profiles create 10 user for test
-        if user["profile_status"] == "public":
-            user_ranking = {}
-            user_ranking["name"] = user["username"]
-            user_ranking["highest_point"] = user["highest_point"]
-            user_ranking_data.append(user_ranking)
+        user_ranking = {}
+        user_ranking["name"] = user["username"]
+        user_ranking["highest_point"] = user["highest_point"]
+        user_ranking_data.append(user_ranking)
 
     user_ranking_data.sort(reverse=True, key=helper.leadboard_ranking_sort)
 
     for i in range(len(user_ranking_data)):
-        user_ranking_data[i]["rank"] = i
+        user_ranking_data[i]["rank"] = i + 1
 
     helper.Better_Print("user ranking at leaderbord", user_ranking_data)
     return render_template("leaderboard.html", style="static/styles/leaderboard.css", user_stat=user_ranking_data)
@@ -312,15 +312,6 @@ def display_userhomepage(userid):
                                change_profile_xsrf=change_profile_xsrf,
                                logout_xsrf=logout_xsrf
                                )
-    elif result_public["path"] == userid and result_public["profile_status"] == "public":
-        # if soemoen is visitng the page and it is public
-        helper.Better_Print("someone is visting a public page", result_public)
-        user_data = mongo.grab_user_stat(result_public["authorize_token"])
-        return render_template("user_Public_Homepage.html",
-                               css_file="/static/styles/homepage.css",
-                               user_username=user_data["username"],
-                               user_highscore=user_data["highest_point"],
-                               user_aboutme=user_data["about_me"],)
     else:
         return redirect("/404")
 
@@ -351,10 +342,9 @@ def change_profile_status():
     if token_checker == None:
         return redirect("/")
     else:
-        # xsrf = request.form.get("change_profile-xsrf")
-        # if not helper.check_xsrf_token(xsrf, mongo, "change_profile_xsrf", token):
-        #     return redirect("/")
-
+        xsrf = request.form.get("change_profile-xsrf")
+        if not helper.check_xsrf_token(xsrf, mongo, "change_profile_xsrf", token):
+            return redirect("/")
         value = ""
         actual_value =token_checker.get("profile_status", None)
         print("actual value: " + str(actual_value), flush=True)
@@ -517,6 +507,7 @@ def logout():
 
     respond =  redirect("/", code=302)
     respond.delete_cookie("token")
+    respond.delete_cookie("login_status")
     return respond
 
-app.run()  # Don't use this for final product [#Jacky]
+# app.run()  # Don't use this for final product [#Jacky]
