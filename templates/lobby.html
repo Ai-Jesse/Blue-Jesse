@@ -27,6 +27,12 @@
             socket.send(JSON.stringify({'messageType': 'leave'}));
         }
 
+        document.addEventListener("keypress", function (event) {
+            if (event.code === "Enter") {
+                sendMessage();
+            }
+        });
+
         function sendMessage() {
             const chatBox = document.getElementById("chat-comment")
             const message = chatBox.value;

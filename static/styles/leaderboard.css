@@ -1,6 +1,6 @@
 body{
     height: 672px;
-    background-image: linear-gradient(to bottom right,#33ffff,#bf80ff,#ff80ff);
+    background-image: linear-gradient(75deg, #040406, #494F55);
 }
 .title{
         font-family: sans-serif;
@@ -29,9 +29,21 @@ td, th {
     padding-bottom: 20px;
     font-size: 36px;
     font-family: sans-serif;
-    color: #00001a;
+    color: #FFFAF0;
 }
-
+#back{
+    background-color:#D3D3D3;
+    border: none;
+    color: black;
+    padding: 15px 32px;
+    right: 0px;
+    bottom: 0px;
+    text-align: center;
+    display: inline-block;
+    font-size: 20px;
+    position: fixed;
+    border-radius: 0.3em;
+}
 /* Gold */
 tr:nth-child(2) {background: gold;}
 /* Silver */
@@ -41,4 +53,3 @@ tr:nth-child(4) {background: #cd7f32;}
 
 tr:nth-child(n+4) {
   background-color: #dddddd;
-}

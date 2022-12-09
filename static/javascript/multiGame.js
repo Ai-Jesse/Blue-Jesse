@@ -119,4 +119,3 @@ function gameover(dead1, dead2){
 
     }
 }
-

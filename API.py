@@ -58,6 +58,22 @@ class Helper:
 
     def gernate_xsrf_token(self, database, table):
         insert_data = {}
+        pool = string.ascii_letters
+        xsrf_token = ""
+        for i in range(25):
+            xsrf_token = xsrf_token + random.choice(pool)
+        insert_data = {"xsrf_token": xsrf_token}
+        database.insert(insert_data, table)
+
+
+    def checks_xsrf_token(self, xsrf_token, database, table):
+        search_value = {"xsrf_token": xsrf_token}
+
+        result = database.search(search_value, table)
+        if result == None:
+            return False
+        else:
+            return True
 
 
 
@@ -152,6 +168,7 @@ class MongoDB_wrapper:
     def grab_all_user_stat(self):
         return self.database["user_stat"].find()
 
+# Soemone over wriete my code so im commiting again hopefully to overwriete it back
 
 # Security check/things goes here
 class Security:
@@ -204,3 +221,9 @@ class Security:
     def check_password(self, password, hashed_password):
         encoded_password = bytes(password, "utf-8")
         return bcrypt.checkpw(encoded_password, hashed_password)
+
+    def escapeHTML(self,content):
+        content = content.replace("&", "&amp")
+        content = content.replace("<", "&lt")
+        content = content.replace(">", "&gt")
+        return content

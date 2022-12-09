@@ -6,7 +6,7 @@ body{
 
 #code{
     margin-top: 50px;
-    margin-left: 550px;
+    margin-left: 500px;
     font-size: 100px;
     font-family: sans-serif;
 }
@@ -35,6 +35,7 @@ body{
     margin-left:30px;
     border-radius: 0.3em;
     /* margin-left:500px; */
+
 }
 
 #chat{
@@ -56,7 +57,7 @@ body{
  }
 
 #chat-comment{
-    width:300px;
+    width:362px;
     padding: 10px 5px;
 }
 
@@ -66,17 +67,19 @@ body{
     border: none;
     font-size: 14px;
     width: 56px;
-    padding: 10px 5px;
-    border-radius: 0.3em;
+    padding: 10px 5px
 }
 
 #popup{
-    background-color:#D3D3DE;
+    background-color:#D3D3D3;
     border: none;
     color: black;
     padding: 15px 32px;
-    font-size: 16px;
     margin-top: 400px;
+    text-align: center;
+    display: inline-block;
+    font-size: 16px;
+    position: relative;
     border-radius: 0.3em;
 }
 
