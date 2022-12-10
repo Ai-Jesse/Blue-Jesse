@@ -1,7 +1,6 @@
 function openChat(){
-    console.log("hi");
     var x= document.getElementById("chat-room");
-    console.log(x)
+    // console.log(x)
     if(x.style.display=="block"){
         x.style.display="none";
         document.getElementById("popup").style.marginTop="400px";

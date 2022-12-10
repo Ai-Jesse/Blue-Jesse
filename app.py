@@ -18,17 +18,17 @@ client = MongoClient("mongo")[name]
 mongo = MongoDB_wrapper(client)
 css_file = "static/styles/index.css"
 
-print("mongoDB is up I think")
+# print("mongoDB is up I think")
 
 # Setting up the Security
 security = Security()
-print("Security is setup I think")
+# print("Security is setup I think")
 
 # Setting up Helper
 helper = Helper()
 # Setting up the App
 app = Flask(name)
-print("App running I think")
+# print("App running I think")
 sock = Sock(app)
 
 @app.after_request # add nosniff to all response
@@ -133,11 +133,11 @@ def user_login():
         #user_datas = mongo.grab_user_stat(token)
 
         if path == None:
-            helper.Better_Print("Path is none", path)
+            # helper.Better_Print("Path is none", path)
             #helper.Better_Print("Path is none user state value", user_data)
             redirect("/404", code=301)
 
-        helper.Better_Print("Find Path", path)
+        # helper.Better_Print("Find Path", path)
         respond = redirect(url_for("display_userhomepage", userid=path))
 
         respond.set_cookie("token", token, 36000, httponly=True)
@@ -182,7 +182,7 @@ def signup_userData():
         # if the input is bad we redirect it to the login page
         return redirect("/signup", code=302)  # redirect the user to login page after a bad username and password
     else:
-        helper.Better_Print("password", password)
+        # helper.Better_Print("password", password)
         # Let hash the password
         hashed_password = security.hash_and_salt_password(password)
 
@@ -236,7 +236,7 @@ def display_leaderBoard():
     for i in range(len(user_ranking_data)):
         user_ranking_data[i]["rank"] = i + 1
 
-    helper.Better_Print("user ranking at leaderbord", user_ranking_data)
+    # helper.Better_Print("user ranking at leaderbord", user_ranking_data)
     return render_template("leaderboard.html", style="static/styles/leaderboard.css", user_stat=user_ranking_data, input="/userpage")
 
 
@@ -272,14 +272,14 @@ def display_userhomepage(userid):
 
     # Checks if the auth token actual matches with the path
     token = request.cookies.get("token", None)
-    helper.Better_Print("token at userpage", token)
+    # helper.Better_Print("token at userpage", token)
     if token == None:
         return redirect("/404")
 
 
     # Checks if the author token matches with the path
     result_path = mongo.check_if_path_exist(userid, token) # check if the path exist
-    helper.Better_Print("result path", result_path)
+    # helper.Better_Print("result path", result_path)
     # Check if the profile is public
     # result_public = mongo.vist_public_profile(userid, token)
     # helper.Better_Print("result public", result_public)
@@ -294,7 +294,7 @@ def display_userhomepage(userid):
         change_profile_xsrf = helper.generate_xsrf_token(mongo, "change_profile_xsrf", token)
         logout_xsrf = helper.generate_xsrf_token(mongo, "logout_xsrf", token)
 
-        helper.Better_Print("Owner of the page is here", result_path)
+        # helper.Better_Print("Owner of the page is here", result_path)
         user_data = mongo.grab_user_stat(token)
         # helper.Better_Print("profile status", user_data.get("profile_status", "does not exist"))
         return render_template("user_Private_Homepage.html",
