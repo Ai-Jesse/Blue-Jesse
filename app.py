@@ -511,12 +511,12 @@ def logout():
     return respond
 
 @app.errorhandler(404)
-def go_back_to_home():
+def go_back_to_home(error):
     return redirect("/")
 
 
 @app.errorhandler(500)
-def go_back():
+def go_back(error):
     return redirect("/")
 
 # app.run()  # Don't use this for final product [#Jacky]

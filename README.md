@@ -7,7 +7,7 @@
 
 
 # url
-http://www.bluejesse.com
+http://bluejesse.com
 
 
 
