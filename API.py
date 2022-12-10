@@ -46,7 +46,7 @@ class Helper:
         search_temp_path = {"authorize_token": old_token}
         replace_temp_path = {"authorize_token": new_token, "path": self.generate_path()}
         database.update(search_temp_path, replace_temp_path, "temp_path")
-        # print(database, flush=True)
+        #print(database, flush=True)
 
         # Update the user_stat
         search_user_stat = {"authorize_token": old_token}
@@ -100,7 +100,6 @@ class MongoDB_wrapper:
     def update(self, searchData, InputData, tableName):
         currentTable = self.database[tableName]
         update_value = {"$set": InputData}
-        # print("test")
         currentTable.update_one(searchData, update_value)
         return None
 
@@ -144,7 +143,6 @@ class MongoDB_wrapper:
         encoded_token = bytes(token, "utf-8")
 
         hashed_token = hashlib.sha256(encoded_token).hexdigest()
-        # print("hashed token: "+ str(hashed_token))
         if path == None:
             return None
         # Check if it is the user itself visting than we don't care if the profile is private or not
@@ -153,7 +151,6 @@ class MongoDB_wrapper:
         path_encode = bytes(path, "utf-8")
         path_search = {"authorize_token": hashed_token, "path": path_encode}
         path_database_checker = self.search(path_search, "temp_path")
-        # print("path_database_check: " + str(path_database_checker), flush=True)
         # for i in self.database["temp_path"].find():
         #     print("temp_path: " + str(i), flush=True)
         #     for key in i:
@@ -199,11 +196,23 @@ class Security:
         return hashin.hexdigest()  # return the hash value
 
     def password_and_user_checker(self, username, password):
-        bad_characters = ["/", "<", ">", ";", ")", "(", "&"]
-        for character in bad_characters:
+        # bad_characters = ["/", "<", ">", ";", ")", "(", "&", ""]
+        good_characters = string.ascii_letters
+        for character in username:
             # checking username and password
-            if character in username or character in password:
+            if character not in good_characters:
+                #print("bad characters")
+                #print(character, flush=True)
                 return True
+        if username == "":
+            return True
+
+        # why tf I can't do both
+        # good_user_name = string.ascii_letters
+        # for character in username:
+        #     if character not in good_user_name:
+        #         print(character, flush=True)
+        #         return True
         # if it does not
         return False
     def duplicate_username(self, username, database):

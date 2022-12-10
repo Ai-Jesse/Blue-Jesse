@@ -28,7 +28,6 @@ security = Security()
 helper = Helper()
 # Setting up the App
 app = Flask(name)
-# print("App running I think")
 sock = Sock(app)
 
 @app.after_request # add nosniff to all response
@@ -62,16 +61,26 @@ def homepage():  # view function
 
 @app.route("/login", methods=["GET"])  # Only get method
 def loginPage():
-    # alert will be made when password is wrong or change the div box text to have sub text
-    # suggestion will be to use cookie to help checking if the login faill 
-    # another option will be me senting post request and make it render a differnt valye in the login box when the loginData fail to get datas
-    # [Jacky]
-    xsrf = helper.generate_xsrf_token(mongo, "login_xsrf")
-    login_status = request.cookies.get("login_status", "Please Login")
-    return render_template("login.html", signup_path="/signup", login_post_path="/loginData",
-                           css_path="static/styles/login.css", display_message=login_status, xsrf=xsrf)
-    # return render_template("login.html", input="/loginData") # Files can be served easier with static files check flask documenation
 
+    token = request.cookies.get("token", None)
+    # helper.Better_Print("token", token)
+    # returns true of false
+    token_search = mongo.check_if_user_exist(token)
+    if not token_search:
+
+        # alert will be made when password is wrong or change the div box text to have sub text
+        # suggestion will be to use cookie to help checking if the login faill
+        # another option will be me senting post request and make it render a differnt valye in the login box when the loginData fail to get datas
+        # [Jacky]
+        xsrf = helper.generate_xsrf_token(mongo, "login_xsrf")
+        login_status = request.cookies.get("login_status", "Please Login")
+        return render_template("login.html", signup_path="/signup", login_post_path="/loginData",
+                               css_path="static/styles/login.css", display_message=login_status, xsrf=xsrf)
+        # return render_template("login.html", input="/loginData") # Files can be served easier with static files check flask documenation
+    else:
+        respond = redirect("/")
+        respond.delete_cookie("signup_status")
+        return respond
 
 # God I hate python
 
@@ -87,6 +96,8 @@ def user_login():
     # Checking if the username is recived correctly [# Jacky]
     # print(username, flush=True)
 
+
+    # delte singup data cookie
     # Plan
     # 1. Search for the user
     # 2. Check if the user exist in database
@@ -111,7 +122,8 @@ def user_login():
         # Let redirect user back to /login page
         # TODO: Write data to session cookie
         redirect_respond = redirect("/login", code=302)
-        redirect_respond.set_cookie("login_status", "No such user")
+        redirect_respond.set_cookie("login_status", "No such user", httponly=True)
+        redirect_respond.delete_cookie("signup_status")
         return redirect_respond
     else:
         # If the user name is there
@@ -140,21 +152,31 @@ def user_login():
         # helper.Better_Print("Find Path", path)
         respond = redirect(url_for("display_userhomepage", userid=path))
 
-        respond.set_cookie("token", token, 36000, httponly=True)
+        respond.set_cookie("token", token, max_age=36000, httponly=True)
+        respond.delete_cookie("signup_status")
         return respond
 
 
 # This is signup
 @app.route("/signup", methods=["GET"])  # Only get method
 def signup():
-    # alert will be made when password is wrong or change the div box text to have sub text
-    # suggestion will be to use cookie to help checking if the login faill
-    # another option will be me senting post request and make it render a differnt valye in the login box when the loginData fail to get datas
-    # [Jacky]
-    xsrf = helper.generate_xsrf_token(mongo, "signup_xsrf")
-    return render_template("signup.html", signup_post_path="/signupData", login_path="/login",
-                           css_path="static/styles/signup.css", xsrf=xsrf)
-    # return render_template("login.html", input="/loginData") # Files can be served easier with static files check flask documenation
+    token = request.cookies.get("token", None)
+    # helper.Better_Print("token", token)
+    # migth  eb issue later fix
+    token_search = mongo.check_if_user_exist(token)
+    #print(token_search, flush=True)
+    if not token_search:
+        # alert will be made when password is wrong or change the div box text to have sub text
+        # suggestion will be to use cookie to help checking if the login faill
+        # another option will be me senting post request and make it render a differnt valye in the login box when the loginData fail to get datas
+        # [Jacky]
+        message = request.cookies.get("signup_status", "Please signup")
+        xsrf = helper.generate_xsrf_token(mongo, "signup_xsrf")
+        return render_template("signup.html", signup_post_path="/signupData", login_path="/login",
+                               css_path="static/styles/signup.css", xsrf=xsrf, display_message=message)
+        # return render_template("login.html", input="/loginData") # Files can be served easier with static files check flask documenation
+    else:
+        return redirect("/")
 
 
 # God I hate python
@@ -165,7 +187,10 @@ def signup_userData():
     forumData = request.form
     xsrf = forumData.get("signup-xsrf")
     if not helper.check_xsrf_token(xsrf, mongo, "signup_xsrf"):
-        return redirect("/signup")
+        message = "Don't mess with my token please"
+        respond = redirect("/signup", code=302)
+        respond.set_cookie("signup_status", message, httponly=True, max_age=300)
+        return respond
     # print("form data", flush=True)
     # print(forumData, flush=True)
     # Can we do a preload of html here or we need to do that in the frontend?
@@ -179,10 +204,14 @@ def signup_userData():
     # this is suppose to clean/ check for bad account and password
     if security.password_and_user_checker(username=username, password=password) or security.duplicate_username(
             username=username, database=mongo):
+        message = "bad username remember only ascii, or maybe that username might be taken sorry"
+
+
         # if the input is bad we redirect it to the login page
-        return redirect("/signup", code=302)  # redirect the user to login page after a bad username and password
+        respond =  redirect("signup", code=302)  # redirect the user to login page after a bad username and password
+        respond.set_cookie("signup_status", message, httponly=True,max_age=300)
+        return respond
     else:
-        # helper.Better_Print("password", password)
         # Let hash the password
         hashed_password = security.hash_and_salt_password(password)
 
@@ -236,7 +265,6 @@ def display_leaderBoard():
     for i in range(len(user_ranking_data)):
         user_ranking_data[i]["rank"] = i + 1
 
-    # helper.Better_Print("user ranking at leaderbord", user_ranking_data)
     return render_template("leaderboard.html", style="static/styles/leaderboard.css", user_stat=user_ranking_data, input="/userpage")
 
 
@@ -272,14 +300,12 @@ def display_userhomepage(userid):
 
     # Checks if the auth token actual matches with the path
     token = request.cookies.get("token", None)
-    # helper.Better_Print("token at userpage", token)
     if token == None:
         return redirect("/404")
 
 
     # Checks if the author token matches with the path
     result_path = mongo.check_if_path_exist(userid, token) # check if the path exist
-    # helper.Better_Print("result path", result_path)
     # Check if the profile is public
     # result_public = mongo.vist_public_profile(userid, token)
     # helper.Better_Print("result public", result_public)
@@ -293,8 +319,6 @@ def display_userhomepage(userid):
         join_lobby_xsrf = helper.generate_xsrf_token(mongo, "game_room_xsrf", token)
         change_profile_xsrf = helper.generate_xsrf_token(mongo, "change_profile_xsrf", token)
         logout_xsrf = helper.generate_xsrf_token(mongo, "logout_xsrf", token)
-
-        # helper.Better_Print("Owner of the page is here", result_path)
         user_data = mongo.grab_user_stat(token)
         # helper.Better_Print("profile status", user_data.get("profile_status", "does not exist"))
         return render_template("user_Private_Homepage.html",
@@ -305,7 +329,7 @@ def display_userhomepage(userid):
                                join_lobby="/lobby/join",
                                user_username=user_data.get("username", None),
                                user_highscore=user_data.get("highest_point", None),
-                               user_aboutme=user_data.get("about_me", None),
+                               user_aboutme="",
                                user_profile_status=user_data.get("profile_status", None),
                                user_profile_picture=user_data.get("profile_picture", None),
                                join_lobby_xsrf=join_lobby_xsrf,

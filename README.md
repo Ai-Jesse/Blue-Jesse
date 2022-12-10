@@ -10,6 +10,12 @@
 http://bluejesse.com
 
 
+# local testing please go to 
+
+localhost:8080
+idk
+
+
 
 
 

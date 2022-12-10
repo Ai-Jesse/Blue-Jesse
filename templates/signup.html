@@ -6,6 +6,7 @@
     <body>
         <div class="start-page"> </div>
         <div id ="signup-form">
+            <h3>{{display_message}}</h3>
     <form action="{{signup_post_path}}" id="signup-form" method="post" enctype="multipart/form-data">
         <input name="signup-xsrf" value="{{xsrf}}" hidden>
             <label for="signup-username">Username: </label>
