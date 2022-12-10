@@ -12,7 +12,7 @@
     <div>
         <h3 id="profile_stat">Current profile status: {{user_profile_status}}</h3>
         <form action="./change_profile" id="change_profile-form" method="post" enctype="multipart/form-data">
-        <input name="change_profile-xsrf" value="{{xsrf}}" hidden>
+        <input name="change_profile-xsrf" value="{{change_profile_xsrf}}" hidden>
         <button class="profileStat">Change profile status</button>
         </form>
     </div>
@@ -23,17 +23,12 @@
             <br>
 
             <form action="./logout" id="logout-form" method="post" enctype="multipart/form-data">
-                <input name="logout-xsrf" value="{{xsrf}}" hidden>
+                <input name="logout-xsrf" value="{{logout_xsrf}}" hidden>
                 <button class="logout">logout</button>
             </form>
 
 {#            <input id="imageUpload" type="file" required="" capture hidden/>#}
 {#            <label for ="imageUpload">Edit Profile</label>#}
-            <h3>Current profile status: {{user_profile_status}}</h3>
-            <form action="./change_profile" id="change_profile-form" method="post" enctype="multipart/form-data">
-                <input name="change_profile-xsrf" value="{{xsrf}}" hidden>
-                <button>Change profile status</button>
-            </form>
 {#             need to think of a way to change between private and public#}
          </div>
 
@@ -51,7 +46,7 @@
     <button id="single" onclick=window.location.href="{{single}}">Single Player</button>
     <button id="lobby" onclick=window.location.href="{{lobby}}">Create Lobby</button>
     <form action="{{join_lobby}}" id="join_lobby-form" method="post" enctype="multipart/form-data">
-        <input name="join_lobby-xsrf" value="{{xsrf}}" hidden>
+        <input name="join_lobby-xsrf" value="{{join_lobby_xsrf}}" hidden>
         <label for="room-code">Room Code: </label>
         <input id="room-code" name="code">
         <input id="join" type="submit" value="Join Lobby">
