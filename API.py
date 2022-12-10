@@ -199,11 +199,23 @@ class Security:
         return hashin.hexdigest()  # return the hash value
 
     def password_and_user_checker(self, username, password):
-        bad_characters = ["/", "<", ">", ";", ")", "(", "&"]
-        for character in bad_characters:
+        # bad_characters = ["/", "<", ">", ";", ")", "(", "&", ""]
+        good_characters = string.ascii_letters
+        for character in username:
             # checking username and password
-            if character in username or character in password:
+            if character not in good_characters:
+                print("bad characters")
+                print(character, flush=True)
                 return True
+        if username == "":
+            return True
+
+        # why tf I can't do both
+        # good_user_name = string.ascii_letters
+        # for character in username:
+        #     if character not in good_user_name:
+        #         print(character, flush=True)
+        #         return True
         # if it does not
         return False
     def duplicate_username(self, username, database):
