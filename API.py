@@ -204,7 +204,7 @@ class Security:
                 #print("bad characters")
                 #print(character, flush=True)
                 return True
-        if username == "":
+        if username == "" or password == "":
             return True
 
         # why tf I can't do both
