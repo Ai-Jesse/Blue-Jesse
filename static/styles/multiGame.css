@@ -1,7 +1,8 @@
 #snakeboard {
     width: 1190px;
     height: 595px;
-    margin-left: 100px;
+    margin-left: 5%;
+    margin-right: 5%;
   }
   /* .chess-square {
     float:left;
