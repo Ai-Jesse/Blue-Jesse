@@ -1,6 +1,7 @@
 const board_border = 'white';
 const board_background = '#040406';
-const snake_col = 'white';
+const snake_col_1 = 'green';
+const snake_col_2 = 'blue';
 const snake_border = 'darkblue';
 
 // Get the canvas element
@@ -19,11 +20,11 @@ socket.onmessage = function (ws_message) {
 // Draw game
 function draw(data) {
     clearCanvas()
-    console.log(data)
-    console.log(data.snake1)
-    console.log(data.snake2)
-    drawSnake(data.snake1)
-    drawSnake(data.snake2)
+    // console.log(data)
+    // console.log(data.snake1)
+    // console.log(data.snake2)
+    drawSnake(data.snake1,snake_col_1)
+    drawSnake(data.snake2, snake_col_2)
     drawFood(data.food)
 }
 
@@ -70,16 +71,19 @@ function sendMessage(message) {
 
 
 // Draw the snake on the canvas
-function drawSnake(snake) {
+function drawSnake(snake, color) {
     // Draw each part
-    snake.forEach(drawSnakePart)
+    for (i of snake){
+        drawSnakePart(i,color)
+    }
+    // snake.forEach(drawSnakePart)
 }
 
 // Draw one snake part
-function drawSnakePart(snakePart) {
+function drawSnakePart(snakePart, color) {
 
     // Set the colour of the snake part
-    snakeboard_ctx.fillStyle = snake_col;
+    snakeboard_ctx.fillStyle = color;
     // Set the border colour of the snake part
     snakeboard_ctx.strokestyle = snake_border;
     // Draw a "filled" rectangle to represent the snake part at the coordinates
@@ -102,7 +106,6 @@ function drawFood(food) {
 // }
 
 function gameover(dead1, dead2, username1, username2){
-    console.log("working");
     if (dead1 && dead2){
         alert("Both lost the game");
         window.location.href="/userpage";

@@ -97,7 +97,6 @@ function update_score(score) {
 }
 
 function gameover(dead, point){
-    console.log("working");
     if (dead){
         alert("Game Over! Final Score: " + point);
         window.location.href="/userpage";
