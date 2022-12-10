@@ -30,9 +30,9 @@ class Helper:
         return encoded
     def new_login(self, database, new_token, username):
         search_user = {"username": username}
-        print(search_user, flush=True)
+        #print(search_user, flush=True)
         old_token = database.search(search_user, "user_authorize_token").get("authorize_token")
-        print("old token: " + str(old_token), flush=True)
+        #print("old token: " + str(old_token), flush=True)
 
         # Update token in user table
         replace_token_user = {"old_token": new_token}
@@ -46,7 +46,7 @@ class Helper:
         search_temp_path = {"authorize_token": old_token}
         replace_temp_path = {"authorize_token": new_token, "path": self.generate_path()}
         database.update(search_temp_path, replace_temp_path, "temp_path")
-        print(database, flush=True)
+        #print(database, flush=True)
 
         # Update the user_stat
         search_user_stat = {"authorize_token": old_token}
@@ -100,7 +100,7 @@ class MongoDB_wrapper:
     def update(self, searchData, InputData, tableName):
         currentTable = self.database[tableName]
         update_value = {"$set": InputData}
-        print("test")
+        #print("test")
         currentTable.update_one(searchData, update_value)
         return None
 
@@ -144,7 +144,7 @@ class MongoDB_wrapper:
         encoded_token = bytes(token, "utf-8")
 
         hashed_token = hashlib.sha256(encoded_token).hexdigest()
-        print("hashed token: "+ str(hashed_token))
+        #print("hashed token: "+ str(hashed_token))
         if path == None:
             return None
         # Check if it is the user itself visting than we don't care if the profile is private or not
@@ -153,7 +153,7 @@ class MongoDB_wrapper:
         path_encode = bytes(path, "utf-8")
         path_search = {"authorize_token": hashed_token, "path": path_encode}
         path_database_checker = self.search(path_search, "temp_path")
-        print("path_database_check: " + str(path_database_checker), flush=True)
+        #print("path_database_check: " + str(path_database_checker), flush=True)
         # for i in self.database["temp_path"].find():
         #     print("temp_path: " + str(i), flush=True)
         #     for key in i:
@@ -204,8 +204,8 @@ class Security:
         for character in username:
             # checking username and password
             if character not in good_characters:
-                print("bad characters")
-                print(character, flush=True)
+                #print("bad characters")
+                #print(character, flush=True)
                 return True
         if username == "":
             return True
