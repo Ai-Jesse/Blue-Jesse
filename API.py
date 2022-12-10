@@ -168,6 +168,8 @@ class MongoDB_wrapper:
         return result
 
     def check_if_token_exist(self, token):
+        if token == None:
+            return None
         encoded_token = bytes(token, "utf-8")
 
         hashed_token = hashlib.sha256(encoded_token).hexdigest()

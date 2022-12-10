@@ -38,17 +38,17 @@ def add_nosniff(response):
 
 @app.route("/")  # converts normal function to view function
 def homepage():  # view function
-    print("Someone is at the homepage", flush=True)
+    # print("Someone is at the homepage", flush=True)
 
     token = request.cookies.get("token", None)
-    helper.Better_Print("token", token)
+    # helper.Better_Print("token", token)
     token_search = mongo.check_if_user_exist(token)
 
     if not token_search:
         return render_template("index.html", input="/login", input2="/signup", input4=css_file)
     else:
         path = mongo.grab_path(token)
-        helper.Better_Print("path at homepage", path)
+        # helper.Better_Print("path at homepage", path)
         return redirect(url_for("display_userhomepage", userid=path))
 
 # @app.route("/homepage")  # converts normal function to view function
@@ -81,7 +81,7 @@ def user_login():
     xsrf = forumData.get("login-xsrf")
     if not helper.check_xsrf_token(xsrf, mongo, "login_xsrf"):
         return redirect("/login")
-    print(forumData, flush=True)
+    # print(forumData, flush=True)
     username = forumData.get("ret-username", "")
     password = forumData.get("ret-password", "")
     # Checking if the username is recived correctly [# Jacky]
@@ -98,8 +98,8 @@ def user_login():
     value = mongo.search(searchable_able, "user")
     # Check if the user is in database
 
-    print(value, flush=True)
-    print(searchable_able, flush=True)
+    # print(value, flush=True)
+    # print(searchable_able, flush=True)
 
     if value == None:
         return redirect("/login", code=302)
@@ -122,7 +122,7 @@ def user_login():
         token = new_token[1]
 
         helper.new_login(mongo, hash_token, username) # This update all the old token in database
-        print("new token: " + str(new_token), flush=True)
+        # print("new token: " + str(new_token), flush=True)
         search_path = {"authorize_token": hash_token}
         # for i in mongo.database["temp_path"].find():
         #     print("temp_path: ", flush=True)
@@ -166,8 +166,8 @@ def signup_userData():
     xsrf = forumData.get("signup-xsrf")
     if not helper.check_xsrf_token(xsrf, mongo, "signup_xsrf"):
         return redirect("/signup")
-    print("form data", flush=True)
-    print(forumData, flush=True)
+    # print("form data", flush=True)
+    # print(forumData, flush=True)
     # Can we do a preload of html here or we need to do that in the frontend?
 
     # Some how get data from the form 
@@ -281,8 +281,8 @@ def display_userhomepage(userid):
     result_path = mongo.check_if_path_exist(userid, token) # check if the path exist
     helper.Better_Print("result path", result_path)
     # Check if the profile is public
-    result_public = mongo.vist_public_profile(userid, token)
-    helper.Better_Print("result public", result_public)
+    # result_public = mongo.vist_public_profile(userid, token)
+    # helper.Better_Print("result public", result_public)
 
 
 
@@ -296,7 +296,7 @@ def display_userhomepage(userid):
 
         helper.Better_Print("Owner of the page is here", result_path)
         user_data = mongo.grab_user_stat(token)
-        helper.Better_Print("profile status", user_data.get("profile_status", "does not exist"))
+        # helper.Better_Print("profile status", user_data.get("profile_status", "does not exist"))
         return render_template("user_Private_Homepage.html",
                                css_file="../static/styles/homepage.css",
                                leaderboard="/leaderboard",
@@ -327,18 +327,18 @@ def display_error():
 def redirect_to_correct():
     token = request.cookies.get("token", None)
     token_checker = mongo.check_if_token_exist(token)
-    print("token checker: " + str(token_checker), flush=True)
+    # print("token checker: " + str(token_checker), flush=True)
     if token_checker == None:
         return redirect("/")
     else:
         path = mongo.grab_path(token)
-        helper.Better_Print("path at userpage/ only", path)
+        # helper.Better_Print("path at userpage/ only", path)
         return redirect(url_for("display_userhomepage", userid=path))
 @app.route("/userpage/change_profile", methods=["POST"])
 def change_profile_status():
     token = request.cookies.get("token", None)
     token_checker = mongo.check_if_token_exist(token)
-    print("token checker: " + str(token_checker), flush=True)
+    # print("token checker: " + str(token_checker), flush=True)
     if token_checker == None:
         return redirect("/")
     else:
@@ -347,7 +347,7 @@ def change_profile_status():
             return redirect("/")
         value = ""
         actual_value =token_checker.get("profile_status", None)
-        print("actual value: " + str(actual_value), flush=True)
+        # print("actual value: " + str(actual_value), flush=True)
         if actual_value == "private":
             value = value + "public"
         elif actual_value == None:
@@ -509,5 +509,14 @@ def logout():
     respond.delete_cookie("token")
     respond.delete_cookie("login_status")
     return respond
+
+@app.errorhandler(404)
+def go_back_to_home(error):
+    return redirect("/")
+
+
+@app.errorhandler(500)
+def go_back(error):
+    return redirect("/")
 
 # app.run()  # Don't use this for final product [#Jacky]
