@@ -9,7 +9,6 @@
         socket.onmessage = function (ws_message) {
             const message = JSON.parse(ws_message.data);
             const messageType = message.messageType
-            console.log(ws_message)
             switch (messageType) {
                 case 'chatMessage':
                     addMessage(message);

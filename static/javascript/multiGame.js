@@ -1,7 +1,7 @@
 const board_border = 'white';
 const board_background = '#040406';
 const snake_col_1 = 'green';
-const snake_col_2 = 'blue';
+const snake_col_2 = 'white';
 const snake_border = 'darkblue';
 
 // Get the canvas element
