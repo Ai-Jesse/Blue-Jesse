@@ -473,6 +473,7 @@ def ws_host_room(ws, path):
         except:
             try:
                 room.leave(ws)
+                break
             except:
                 break
 
@@ -514,6 +515,7 @@ def ws_multi_game(ws, path):
         except:
             try:
                 game.leave(ws)
+                break
             except:
                 break
 
