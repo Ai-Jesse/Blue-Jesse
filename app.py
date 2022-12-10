@@ -163,6 +163,7 @@ def user_login():
 def signup():
     token = request.cookies.get("token", None)
     # helper.Better_Print("token", token)
+    # migth  eb issue later fix
     token_search = mongo.check_if_user_exist(token)
     print(token_search, flush=True)
     if not token_search:
