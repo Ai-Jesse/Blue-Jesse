@@ -56,18 +56,22 @@ class Helper:
     def leadboard_ranking_sort(self, ranking_item):
         return ranking_item["highest_point"]
 
-    def gernate_xsrf_token(self, database, table):
-        insert_data = {}
+    def generate_xsrf_token(self, database, table, auth_token=None):
         pool = string.ascii_letters
         xsrf_token = ""
         for i in range(25):
             xsrf_token = xsrf_token + random.choice(pool)
-        insert_data = {"xsrf_token": xsrf_token}
+        insert_data = {"xsrf_token": xsrf_token, "authorize_token": auth_token}
+        if auth_token == None:
+            insert_data = {"xsrf_token": xsrf_token}
         database.insert(insert_data, table)
+        return xsrf_token
 
 
-    def checks_xsrf_token(self, xsrf_token, database, table):
-        search_value = {"xsrf_token": xsrf_token}
+    def check_xsrf_token(self, xsrf_token, database, table, auth_token=None):
+        search_value = {"xsrf_token": xsrf_token, "authorize_token": auth_token}
+        if auth_token == None:
+            search_value = {"xsrf_token": xsrf_token}
 
         result = database.search(search_value, table)
         if result == None:
@@ -96,9 +100,16 @@ class MongoDB_wrapper:
     def update(self, searchData, InputData, tableName):
         currentTable = self.database[tableName]
         update_value = {"$set": InputData}
+        print("test")
         currentTable.update_one(searchData, update_value)
         return None
 
+    def update_user_point(self, token, point):
+        encoded_token = bytes(token, "utf-8")
+
+        update_value = {"highest_point": point}
+        search_user_stat = {"authorize_token": hashlib.sha256(encoded_token).hexdigest()}
+        self.update(search_user_stat, update_value, "user_stat")
 
     def grab_user_stat(self, token):
         encoded_token = bytes(token, "utf-8")
@@ -137,22 +148,22 @@ class MongoDB_wrapper:
         if path == None:
             return None
         # Check if it is the user itself visting than we don't care if the profile is private or not
-        print("my own path type" + str(type(path)))
-        print("my own hash token type" + str(type(hashed_token)))
+        # print("my own path type" + str(type(path)))
+        # print("my own hash token type" + str(type(hashed_token)))
         path_encode = bytes(path, "utf-8")
         path_search = {"authorize_token": hashed_token, "path": path_encode}
         path_database_checker = self.search(path_search, "temp_path")
         print("path_database_check: " + str(path_database_checker), flush=True)
-        for i in self.database["temp_path"].find():
-            print("temp_path: " + str(i), flush=True)
-            for key in i:
-                print(str(key) + " type " + str(type(key)))
-                print(str(i[key]) + " type " + str(type(i[key])))
+        # for i in self.database["temp_path"].find():
+        #     print("temp_path: " + str(i), flush=True)
+        #     for key in i:
+        #         print(str(key) + " type " + str(type(key)))
+        #         print(str(i[key]) + " type " + str(type(i[key])))
         return path_database_checker
     def vist_public_profile(self, path, token):
         # Check if it is a public profile
         path_public_search = {"path": path, "profile_status": "public"}
-        result = self.search(path_public_search, "temp_path")
+        result = self.search(path_public_search, "user_stat")
 
         return result
 
@@ -165,10 +176,12 @@ class MongoDB_wrapper:
         resutl = self.search(token_search, "user_stat")
         return resutl
 
-    def grab_all_user_stat(self):
-        return self.database["user_stat"].find()
-
-# Soemone over wriete my code so im commiting again hopefully to overwriete it back
+    def grab_all_user_stat(self, query=None):
+        if query == None:
+            return self.database["user_stat"].find()
+        else:
+            return self.database["user_stat"].find(query)
+# Soemone over wriete my code so im commiting again hopefully to overwriete it backq
 
 # Security check/things goes here
 class Security:

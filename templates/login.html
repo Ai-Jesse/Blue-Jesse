@@ -9,6 +9,7 @@
     <div id ="login-form">
         <h3>{{display_message}}</h3>
     <form action="{{login_post_path}}" id="login-form" method="post" enctype="multipart/form-data">
+        <input name="login-xsrf" value="{{xsrf}}" hidden>
         <label for="login-username">Username: </label>
         <input type="text" id="login-username" name="ret-username"></input>
         <br/>

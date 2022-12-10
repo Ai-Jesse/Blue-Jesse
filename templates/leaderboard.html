@@ -9,11 +9,20 @@
 <h2 class="title">LeaderBoard</h2>
 <table id ="rank">
 <tr>
-
     <th>Rank</th>
     <th>Name</th>
     <th>Highest Score</th>
   </tr>
+    {%for user in user_stat%}
+        <tr>
+        <th>{{ user["rank"]}}</th>
+        <th>{{user["name"]}}</th>
+        <th>{{ user["highest_point"]}}</th>
+        </tr>
+    {%endfor%}
+
+
+
 </table>
 </body>
-<script src="static/javascript/rank.js"></script>
+</html>

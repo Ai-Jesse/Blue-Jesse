@@ -13,7 +13,7 @@ socket.onmessage = function (ws_message) {
     const data = JSON.parse(ws_message.data);
     draw(data)
     // update_score(data.point1, data.point2)
-    gameover(data.died1, data.died2)
+    gameover(data.died1, data.died2, data.username1, data.username2)
 }
 
 // Draw game
@@ -101,7 +101,7 @@ function drawFood(food) {
 //     document.getElementById("points-2"),innerHTML=score2;
 // }
 
-function gameover(dead1, dead2){
+function gameover(dead1, dead2, username1, username2){
     console.log("working");
     if (dead1 && dead2){
         alert("Both lost the game");
@@ -109,12 +109,12 @@ function gameover(dead1, dead2){
 
     }
     else if(dead2){
-        alert("Game Over. Player 1 wins!");
+        alert("Game Over. " + username1 + " wins!");
         window.location.href="/userpage";
 
     }
     else if (dead1) {
-        alert("Game Over. Player 2 wins!");
+        alert("Game Over. " + username2 + " wins!");
         window.location.href="/userpage";
 
     }
