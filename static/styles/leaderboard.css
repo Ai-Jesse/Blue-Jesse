@@ -53,3 +53,4 @@ tr:nth-child(4) {background: #cd7f32;}
 
 tr:nth-child(n+4) {
   background-color: #dddddd;
+}
