@@ -236,8 +236,8 @@ def display_leaderBoard():
     for i in range(len(user_ranking_data)):
         user_ranking_data[i]["rank"] = i + 1
 
-    # helper.Better_Print("user ranking at leaderbord", user_ranking_data)
-    return render_template("leaderboard.html", style="static/styles/leaderboard.css", user_stat=user_ranking_data)
+    helper.Better_Print("user ranking at leaderbord", user_ranking_data)
+    return render_template("leaderboard.html", style="static/styles/leaderboard.css", user_stat=user_ranking_data, input="/userpage")
 
 
 # @app.route("/rank", methods=["GET"])
